@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UX Design Directions - Proyecto Mistral Hackathon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2D3A3A;
+      --accent: #B88A44;
+      --surface: #FAF7F2;
+      --text: #111111;
+      --ok: #2f7d57;
+      --warn: #9a6b00;
+      --risk: #8a2c2c;
+      --radius: 14px;
+      --shadow: 0 8px 24px rgba(17,17,17,0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      color: var(--text);
+      background: linear-gradient(140deg, #f8f3eb, #fdfcf9);
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+      background: rgba(250,247,242,0.92);
+      border-bottom: 1px solid #e7dfd3;
+      padding: 16px 22px;
+    }
+    h1, h2, h3 { font-family: "Plus Jakarta Sans", Inter, sans-serif; margin: 0; }
+    h1 { font-size: 22px; }
+    .subtitle { margin-top: 6px; color: #4b5563; font-size: 14px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      padding: 18px;
+    }
+    .dir {
+      background: #fff;
+      border: 1px solid #e8e1d7;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .dir:hover { transform: translateY(-3px); box-shadow: 0 14px 28px rgba(17,17,17,0.12); }
+    .dir-head {
+      padding: 14px;
+      background: linear-gradient(110deg, var(--primary), #435858);
+      color: #f8f4ef;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .badge { font-size: 12px; padding: 4px 8px; border-radius: 999px; background: rgba(255,255,255,0.2); }
+    .canvas { padding: 12px; background: var(--surface); min-height: 330px; }
+    .shell { border: 1px solid #ddd3c3; border-radius: var(--radius); background: #fff; overflow: hidden; }
+    .top { background: #f3eee6; border-bottom: 1px solid #e8dece; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #596166; }
+    .body { padding: 10px; display: grid; gap: 8px; }
+    .kpi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .kpi > div { background: #f9f6f1; border: 1px solid #ece3d5; border-radius: 10px; padding: 6px; font-size: 11px; }
+    .list { display: grid; gap: 6px; }
+    .card { border: 1px solid #ebdfcb; background: #fffdfa; border-radius: 10px; padding: 8px; }
+    .row { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+    .chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+    .chip { font-size: 11px; padding: 3px 7px; border-radius: 999px; border: 1px solid #d8cfbe; background: #f7f2ea; }
+    .chip.risk { color: var(--risk); border-color: #e2b4b4; background: #fff1f1; }
+    .chip.ok { color: var(--ok); border-color: #b9dec8; background: #ecf9f1; }
+    .chip.warn { color: var(--warn); border-color: #e8d8ad; background: #fff9e9; }
+    .btn { font-size: 11px; border: none; border-radius: 8px; padding: 5px 8px; background: var(--primary); color: #f8f4ef; }
+    .btn.alt { background: #e9dfcf; color: #3d3d3d; }
+    .rail { display: grid; grid-template-columns: 68px 1fr; }
+    .nav { border-right: 1px solid #e8dece; background: #f9f5ee; padding: 8px 6px; display: grid; gap: 6px; }
+    .nav div { height: 20px; border-radius: 6px; background: #e8dfd1; }
+    .split { display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px; }
+    .foot { padding: 10px 12px 14px; border-top: 1px solid #eee4d6; font-size: 13px; color: #4b5563; }
+    .pick { font-weight: 600; color: #1f2937; }
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+      .split { grid-template-columns: 1fr; }
+      .kpi { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Design Directions - Proyecto Mistral Hackathon</h1>
+    <div class="subtitle">6 visual directions for triage-first, premium concierge UX. Compare hierarchy, density, and interaction clarity.</div>
+  </header>
+
+  <main class="grid">
+    <section class="dir">
+      <div class="dir-head"><h3>Direction 1 - Executive Radar</h3><span class="badge">High clarity</span></div>
+      <div class="canvas"><div class="shell"><div class="top"><span>Concierge Triage</span><span>Safe SLA 92%</span></div><div class="body"><div class="kpi"><div>Urgent 4</div><div>At Risk 2</div><div>Recovered 9</div></div><div class="list"><div class="card"><div class="row"><strong>VIP Bridal Inquiry</strong><button class="btn">Reply</button></div><div class="chips"><span class="chip risk">At-Risk Pulse</span><span class="chip warn">20m no reply</span></div></div><div class="card"><div class="row"><strong>Color Correction</strong><button class="btn alt">Review</button></div><div class="chips"><span class="chip warn">High Intent</span><span class="chip">Premium</span></div></div></div></div></div></div>
+      <div class="foot"><span class="pick">Best for:</span> Fast top-3 scanning with strong KPI-at-a-glance framing.</div>
+    </section>
+
+    <section class="dir">
+      <div class="dir-head"><h3>Direction 2 - Concierge Inbox</h3><span class="badge">Conversational</span></div>
+      <div class="canvas"><div class="shell"><div class="top"><span>Inbox + Actions</span><span>3 Urgent</span></div><div class="body split"><div class="list"><div class="card"><div class="row"><strong>VIP Hair Treatment</strong><span class="chip risk">Risk</span></div><div class="chips"><span class="chip">Needs quote</span><span class="chip warn">SLA 3m</span></div></div><div class="card"><div class="row"><strong>Follow-up no-show</strong><span class="chip warn">Warm</span></div><div class="chips"><span class="chip">Recovery script</span></div></div></div><div class="card"><strong>Concierge Draft</strong><p style="margin:6px 0 8px;font-size:12px;color:#4b5563">Personalized recovery response with premium tone.</p><button class="btn">Approve & Send</button></div></div></div></div>
+      <div class="foot"><span class="pick">Best for:</span> Messaging-heavy teams that want action inline with conversation context.</div>
+    </section>
+
+    <section class="dir">
+      <div class="dir-head"><h3>Direction 3 - Signal Board</h3><span class="badge">Pulse-centric</span></div>
+      <div class="canvas"><div class="shell"><div class="top"><span>Signal Board</span><span>Live Updates</span></div><div class="body"><div class="split"><div class="card"><strong>At-Risk Pulse</strong><div class="chips"><span class="chip risk">2 Critical</span><span class="chip warn">1 Escalating</span></div></div><div class="card"><strong>Safe Queue</strong><div class="chips"><span class="chip ok">7 Stable</span></div></div></div><div class="list"><div class="card"><div class="row"><strong>New VIP Lead</strong><button class="btn">Prioritize</button></div></div><div class="card"><div class="row"><strong>48h Inactive Lead</strong><button class="btn alt">Recovery</button></div></div></div></div></div></div>
+      <div class="foot"><span class="pick">Best for:</span> Distinctive brand expression around your unique At-Risk Pulse mechanic.</div>
+    </section>
+
+    <section class="dir">
+      <div class="dir-head"><h3>Direction 4 - Compact Pro</h3><span class="badge">Dense efficiency</span></div>
+      <div class="canvas"><div class="shell"><div class="top"><span>Compact Queue</span><span>Keyboard-friendly</span></div><div class="rail"><div class="nav"><div></div><div></div><div></div><div></div></div><div class="body"><div class="list"><div class="card"><div class="row"><strong>Lead #104</strong><span class="chip risk">P1</span></div></div><div class="card"><div class="row"><strong>Lead #091</strong><span class="chip warn">P2</span></div></div><div class="card"><div class="row"><strong>Lead #087</strong><span class="chip ok">P3</span></div></div></div></div></div></div></div>
+      <div class="foot"><span class="pick">Best for:</span> Power users processing high volume quickly on desktop.</div>
+    </section>
+
+    <section class="dir">
+      <div class="dir-head"><h3>Direction 5 - Premium Calm</h3><span class="badge">Luxury minimal</span></div>
+      <div class="canvas"><div class="shell"><div class="top"><span>Morning Brief</span><span>Ready</span></div><div class="body"><div class="card" style="background:#fdf8ef"><strong>Top 3 urgent leads ready</strong><p style="margin:6px 0 0;font-size:12px;color:#565656">Reviewed in 8 seconds</p></div><div class="list"><div class="card"><div class="row"><strong>Bridal package request</strong><button class="btn">Handle</button></div></div><div class="card"><div class="row"><strong>Retention recovery</strong><button class="btn alt">Review</button></div></div></div></div></div></div>
+      <div class="foot"><span class="pick">Best for:</span> Calm confidence, premium brand feel, lower cognitive load.</div>
+    </section>
+
+    <section class="dir">
+      <div class="dir-head"><h3>Direction 6 - Hybrid Command</h3><span class="badge">Balanced</span></div>
+      <div class="canvas"><div class="shell"><div class="top"><span>Command View</span><span>Mobile + Desktop</span></div><div class="body"><div class="kpi"><div>Urgent 3</div><div>SLA Risk 1</div><div>Cleared 12</div></div><div class="split"><div class="list"><div class="card"><div class="row"><strong>VIP color session</strong><span class="chip risk">Critical</span></div></div><div class="card"><div class="row"><strong>Rebooking inquiry</strong><span class="chip warn">High</span></div></div></div><div class="card"><strong>Quick Actions</strong><div class="chips"><span class="chip">Generate Reply</span><span class="chip">Escalate</span><span class="chip">Mark Safe</span></div></div></div></div></div></div>
+      <div class="foot"><span class="pick">Best for:</span> Most balanced option between speed, clarity, and premium tone.</div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UX Color Themes - Proyecto Mistral Hackathon</title>
+  <style>
+    body{font-family:Inter,system-ui,sans-serif;margin:0;background:#f7f4ee;color:#111}
+    header{padding:20px;border-bottom:1px solid #e3dccf;background:#fff}
+    h1{margin:0 0 6px;font-size:22px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;padding:16px}
+    .card{background:#fff;border:1px solid #e3dccf;border-radius:14px;overflow:hidden}
+    .head{padding:10px 12px;font-weight:700;border-bottom:1px solid #eee}
+    .sw{display:grid;grid-template-columns:repeat(4,1fr)}
+    .sw div{height:64px;display:flex;align-items:end;justify-content:center;font-size:11px;color:#fff;padding-bottom:6px}
+    .meta{padding:10px 12px;font-size:13px;color:#4b5563}
+    .tag{display:inline-block;background:#111;color:#fff;font-size:11px;padding:2px 8px;border-radius:999px;margin-left:6px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Color Themes Visualizer</h1>
+    <div>Selected theme: <strong>Editorial Premium</strong> <span class="tag">Chosen</span></div>
+  </header>
+  <main class="grid">
+    <section class="card">
+      <div class="head">Warm Luxury</div>
+      <div class="sw">
+        <div style="background:#1F6A5A">#1F6A5A</div>
+        <div style="background:#C8A96B">#C8A96B</div>
+        <div style="background:#F7F4EE;color:#222">#F7F4EE</div>
+        <div style="background:#111827">#111827</div>
+      </div>
+      <div class="meta">Premium warmth with operational clarity.</div>
+    </section>
+    <section class="card">
+      <div class="head">Modern Concierge</div>
+      <div class="sw">
+        <div style="background:#0F4C81">#0F4C81</div>
+        <div style="background:#D4AF37">#D4AF37</div>
+        <div style="background:#F8FAFC;color:#222">#F8FAFC</div>
+        <div style="background:#0B1220">#0B1220</div>
+      </div>
+      <div class="meta">Trust-forward contrast and strong enterprise legibility.</div>
+    </section>
+    <section class="card">
+      <div class="head">Editorial Premium <span class="tag">Chosen</span></div>
+      <div class="sw">
+        <div style="background:#2D3A3A">#2D3A3A</div>
+        <div style="background:#B88A44">#B88A44</div>
+        <div style="background:#FAF7F2;color:#222">#FAF7F2</div>
+        <div style="background:#111111">#111111</div>
+      </div>
+      <div class="meta">Calm premium tone with strong triage readability.</div>
+    </section>
+  </main>
+</body>
+</html>
