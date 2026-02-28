@@ -42,7 +42,7 @@ story_location: _bmad-output/implementation-artifacts
 development_status:
   epic-1: in-progress
   1-0-initialize-project-from-approved-starter-template: done
-  1-1-ingest-whatsapp-leads-with-source-metadata: backlog
+  1-1-ingest-whatsapp-leads-with-source-metadata: ready-for-dev
   1-2-persist-interaction-timeline-and-ranked-queue-view: backlog
   epic-1-retrospective: optional
 
