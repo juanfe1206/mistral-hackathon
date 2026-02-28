@@ -20,6 +20,9 @@
 # production
 /build
 
+# pnpm alignment - ignore npm lockfile when using pnpm
+package-lock.json
+
 # misc
 .DS_Store
 *.pem

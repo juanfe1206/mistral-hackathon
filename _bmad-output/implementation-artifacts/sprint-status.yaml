@@ -2,7 +2,7 @@
 # project: Proyecto Mistral Hackathon
 # project_key: NOKEY
 # tracking_system: file-system
-# story_location: /Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/implementation-artifacts
+# story_location: _bmad-output/implementation-artifacts
 
 # STATUS DEFINITIONS:
 # ==================
@@ -37,11 +37,11 @@ generated: 2026-02-28
 project: Proyecto Mistral Hackathon
 project_key: NOKEY
 tracking_system: file-system
-story_location: /Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/implementation-artifacts
+story_location: _bmad-output/implementation-artifacts
 
 development_status:
-  epic-1: backlog
-  1-0-initialize-project-from-approved-starter-template: backlog
+  epic-1: in-progress
+  1-0-initialize-project-from-approved-starter-template: done
   1-1-ingest-whatsapp-leads-with-source-metadata: backlog
   1-2-persist-interaction-timeline-and-ranked-queue-view: backlog
   epic-1-retrospective: optional

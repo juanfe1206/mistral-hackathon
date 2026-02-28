@@ -2,9 +2,9 @@
 stepsCompleted: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 lastStep: 14
 inputDocuments:
-  - "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/prd.md"
-  - "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/product-brief-Proyecto Mistral Hackathon-2026-02-28.md"
-  - "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/brainstorming/brainstorming-session-2026-02-28.md"
+  - "_bmad-output/planning-artifacts/prd.md"
+  - "_bmad-output/planning-artifacts/product-brief-Proyecto Mistral Hackathon-2026-02-28.md"
+  - "_bmad-output/brainstorming/brainstorming-session-2026-02-28.md"
 ---
 
 # UX Design Specification Proyecto Mistral Hackathon

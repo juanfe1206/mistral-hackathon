@@ -5,13 +5,13 @@ date: "2026-02-28"
 assessor: "Codex"
 assessmentRun: "recheck-aligned-artifacts"
 documentsUsed:
-  prd: "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/prd.md"
-  architecture: "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/architecture.md"
-  epics: "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/epics.md"
+  prd: "_bmad-output/planning-artifacts/prd.md"
+  architecture: "_bmad-output/planning-artifacts/architecture.md"
+  epics: "_bmad-output/planning-artifacts/epics.md"
   ux:
-    - "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/ux-design-specification.md"
-    - "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/ux-design-directions.html"
-    - "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/ux-color-themes.html"
+    - "_bmad-output/planning-artifacts/ux-design-specification.md"
+    - "_bmad-output/planning-artifacts/ux-design-directions.html"
+    - "_bmad-output/planning-artifacts/ux-color-themes.html"
 ---
 
 # Implementation Readiness Assessment Report (Recheck)

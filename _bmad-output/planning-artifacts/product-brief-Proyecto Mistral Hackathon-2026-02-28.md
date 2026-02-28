@@ -1,7 +1,7 @@
 ---
 stepsCompleted: [1, 2, 3, 4, 5]
 inputDocuments:
-  - "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/brainstorming/brainstorming-session-2026-02-28.md"
+  - "_bmad-output/brainstorming/brainstorming-session-2026-02-28.md"
 date: 2026-02-28
 author: Rodri
 ---

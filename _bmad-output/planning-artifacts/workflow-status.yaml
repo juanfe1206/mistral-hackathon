@@ -1,4 +1,4 @@
 # BMAD workflow status tracker
 last_updated: 2026-02-28T16:32:57Z
 workflow_status:
-  create-ux-design: "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/ux-design-specification.md"
+  create-ux-design: "_bmad-output/planning-artifacts/ux-design-specification.md"

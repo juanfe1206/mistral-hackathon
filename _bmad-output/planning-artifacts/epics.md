@@ -5,9 +5,9 @@ stepsCompleted:
   - step-03-create-stories
   - step-04-final-validation
 inputDocuments:
-  - /Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/prd.md
-  - /Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/architecture.md
-  - /Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/ux-design-specification.md
+  - _bmad-output/planning-artifacts/prd.md
+  - _bmad-output/planning-artifacts/architecture.md
+  - _bmad-output/planning-artifacts/ux-design-specification.md
 ---
 
 # Proyecto Mistral Hackathon - Epic Breakdown

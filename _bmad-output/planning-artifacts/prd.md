@@ -18,8 +18,8 @@ stepsCompleted:
   - step-e-02-review
   - step-e-03-edit
 inputDocuments:
-  - "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/product-brief-Proyecto Mistral Hackathon-2026-02-28.md"
-  - "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/brainstorming/brainstorming-session-2026-02-28.md"
+  - "_bmad-output/planning-artifacts/product-brief-Proyecto Mistral Hackathon-2026-02-28.md"
+  - "_bmad-output/brainstorming/brainstorming-session-2026-02-28.md"
 documentCounts:
   briefCount: 1
   researchCount: 0

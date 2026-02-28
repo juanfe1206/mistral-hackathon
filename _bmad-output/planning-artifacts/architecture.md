@@ -1,9 +1,9 @@
 ---
 stepsCompleted: [1, 2, 3, 4, 5, 6, 7, 8]
 inputDocuments:
-  - "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/prd.md"
-  - "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/ux-design-specification.md"
-  - "/Users/rodrigoholguera/Desktop/Programar/Proyecto Mistral Hackathon/_bmad-output/planning-artifacts/product-brief-Proyecto Mistral Hackathon-2026-02-28.md"
+  - "_bmad-output/planning-artifacts/prd.md"
+  - "_bmad-output/planning-artifacts/ux-design-specification.md"
+  - "_bmad-output/planning-artifacts/product-brief-Proyecto Mistral Hackathon-2026-02-28.md"
 workflowType: 'architecture'
 lastStep: 8
 status: 'complete'
