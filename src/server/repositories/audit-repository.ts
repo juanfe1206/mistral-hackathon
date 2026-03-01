@@ -14,6 +14,14 @@ type PrismaLike = {
   auditEvent: { create: typeof prisma.auditEvent.create };
 };
 
+const GOVERNANCE_EVENT_TYPES = [
+  "priority.overridden",
+  "action.approved",
+  "action.sent",
+  "lifecycle.marked",
+  "reply.generated",
+] as const;
+
 export async function createAuditEvent(
   input: CreateAuditEventInput,
   client?: PrismaLike
@@ -28,5 +36,25 @@ export async function createAuditEvent(
       occurredAt: input.occurredAt,
       correlationId: input.correlationId,
     },
+  });
+}
+
+export async function findGovernanceEventsByLeadId(
+  leadId: string,
+  tenantId: string,
+  options?: { limit?: number; offset?: number }
+) {
+  return prisma.auditEvent.findMany({
+    where: {
+      tenantId,
+      eventType: { in: [...GOVERNANCE_EVENT_TYPES] },
+      payload: {
+        path: ["lead_id"],
+        equals: leadId,
+      },
+    },
+    orderBy: { occurredAt: "asc" },
+    take: options?.limit ?? 200,
+    skip: options?.offset ?? 0,
   });
 }

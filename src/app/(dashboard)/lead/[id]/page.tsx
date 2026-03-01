@@ -4,6 +4,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { LeadSlaIndicator, type SlaStatusData } from "@/components/SLASafetyIndicator";
+import { AtRiskPulseBanner } from "@/features/risk-pulse/components/AtRiskPulseBanner";
+import { ConciergeReplyComposer, type ComposerTone, type ComposerStatus } from "@/features/reply-composer/components/ConciergeReplyComposer";
+import {
+  DecisionTimeline,
+  type DecisionTimelineItem,
+} from "@/features/governance/components/DecisionTimeline";
 
 type Priority = "vip" | "high" | "low";
 
@@ -35,18 +41,11 @@ interface Lead {
   sla_status?: SlaStatusData | null;
 }
 
-interface Interaction {
-  id: string;
-  event_type: string;
-  occurred_at: string;
-  payload: Record<string, unknown>;
-}
-
 export default function LeadDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const [lead, setLead] = useState<Lead | null>(null);
-  const [timeline, setTimeline] = useState<Interaction[]>([]);
+  const [timeline, setTimeline] = useState<DecisionTimelineItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,11 +60,10 @@ export default function LeadDetailPage() {
   const [draft, setDraft] = useState("");
   const [generating, setGenerating] = useState(false);
   const [replyError, setReplyError] = useState<string | null>(null);
-  const [replyErrorSource, setReplyErrorSource] = useState<"generate" | "approve" | "send" | null>(
-    null
-  );
   const [approved, setApproved] = useState(false);
   const [sending, setSending] = useState(false);
+  const [tone, setTone] = useState<ComposerTone>("warm");
+  const [lastSendSuccess, setLastSendSuccess] = useState(false);
 
   const loadData = async () => {
     if (!id) return;
@@ -78,14 +76,27 @@ export default function LeadDetailPage() {
       setOverrideError(null);
       setLifecycleError(null);
       setReplyError(null);
-      setReplyErrorSource(null);
       if (leadJson.data) {
         setLead(leadJson.data);
         setError(null);
       } else if (leadJson.error) {
         setError(leadJson.error.message);
       }
-      if (timelineJson.data) setTimeline(timelineJson.data);
+      if (timelineJson.data) {
+        const normalizedTimeline: DecisionTimelineItem[] = (timelineJson.data as Array<Record<string, unknown>>).map((entry) => ({
+          id: String(entry.id ?? crypto.randomUUID()),
+          event_type: String(entry.event_type ?? "unknown"),
+          occurred_at: String(entry.occurred_at ?? new Date().toISOString()),
+          event_label: entry.event_label ? String(entry.event_label) : null,
+          actor: entry.actor ? String(entry.actor) : null,
+          rationale: entry.rationale ? String(entry.rationale) : null,
+          transition: entry.transition ? String(entry.transition) : null,
+          flagged: Boolean(entry.flagged),
+          source: entry.source === "audit" ? "audit" : "interaction",
+          details: (entry.payload as Record<string, unknown> | undefined) ?? {},
+        }));
+        setTimeline(normalizedTimeline);
+      }
     } catch (err) {
       setError(String(err));
     } finally {
@@ -103,7 +114,7 @@ export default function LeadDetailPage() {
     setDraft("");
     setApproved(false);
     setReplyError(null);
-    setReplyErrorSource(null);
+    setLastSendSuccess(false);
   }, [id]);
 
   useEffect(() => {
@@ -166,7 +177,6 @@ export default function LeadDetailPage() {
     if (!id) return;
     setGenerating(true);
     setReplyError(null);
-    setReplyErrorSource(null);
     try {
       const res = await fetch("/api/replies/generate", {
         method: "POST",
@@ -177,13 +187,12 @@ export default function LeadDetailPage() {
       if (res.ok && json.data?.draft) {
         setDraft(json.data.draft);
         setApproved(false);
+        setLastSendSuccess(false);
       } else {
         setReplyError(json.error?.message ?? "Draft generation failed");
-        setReplyErrorSource("generate");
       }
     } catch (err) {
       setReplyError(String(err));
-      setReplyErrorSource("generate");
     } finally {
       setGenerating(false);
     }
@@ -193,7 +202,6 @@ export default function LeadDetailPage() {
     if (!id || !draft.trim()) return;
     setSending(true);
     setReplyError(null);
-    setReplyErrorSource(null);
     try {
       const res = await fetch(`/api/leads/${id}/approve-reply`, {
         method: "POST",
@@ -203,13 +211,12 @@ export default function LeadDetailPage() {
       const json = await res.json();
       if (res.ok) {
         setApproved(true);
+        setLastSendSuccess(false);
       } else {
         setReplyError(json.error?.message ?? "Approval failed");
-        setReplyErrorSource("approve");
       }
     } catch (err) {
       setReplyError(String(err));
-      setReplyErrorSource("approve");
     } finally {
       setSending(false);
     }
@@ -220,7 +227,6 @@ export default function LeadDetailPage() {
     if (needsApproval && !approved) return;
     setSending(true);
     setReplyError(null);
-    setReplyErrorSource(null);
     try {
       const res = await fetch(`/api/leads/${id}/approve-reply`, {
         method: "POST",
@@ -231,14 +237,13 @@ export default function LeadDetailPage() {
       if (res.ok) {
         setDraft("");
         setApproved(false);
+        setLastSendSuccess(true);
         loadData();
       } else {
         setReplyError(json.error?.message ?? "Send failed");
-        setReplyErrorSource("send");
       }
     } catch (err) {
       setReplyError(String(err));
-      setReplyErrorSource("send");
     } finally {
       setSending(false);
     }
@@ -293,6 +298,17 @@ export default function LeadDetailPage() {
 
   const hasClassification = (lead.reason_tags?.length ?? 0) > 0;
   const showMistralBanner = !hasClassification || (lead.risk_pulses?.length && !draft);
+  const activePulse = (lead.risk_pulses ?? [])[0] ?? null;
+  const confidenceMarker = draft.trim().length > 0 ? (lead.priority === "vip" ? 0.92 : lead.priority === "high" ? 0.81 : 0.74) : null;
+  const composerStatus: ComposerStatus = replyError
+    ? "failed"
+    : lastSendSuccess
+      ? "sent"
+      : draft.trim().length === 0
+        ? "drafting"
+        : needsApproval && !approved
+          ? "pending-approval"
+          : "generated";
 
   return (
     <div style={{ padding: "1.5rem", maxWidth: 640, margin: "0 auto" }}>
@@ -497,204 +513,47 @@ export default function LeadDetailPage() {
           </span>
         )}
       </h1>
-      {lead.lifecycle_state === "at_risk" && (
-        <div
-          role="alert"
-          aria-live="polite"
-          style={{
-            padding: "1rem",
-            marginBottom: "1rem",
-            border: "1px solid rgba(200, 100, 0, 0.5)",
-            borderRadius: 8,
-            backgroundColor: "rgba(200, 100, 0, 0.08)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-            <span aria-hidden="true">⚠</span>
-            <strong>At-Risk Pulse</strong>
-          </div>
-          {(lead.risk_pulses ?? [])[0] && (
-            <p style={{ margin: "0 0 0.75rem 0", fontSize: "0.875rem" }}>
-              {(lead.risk_pulses ?? [])[0].reason} · Detected{" "}
-              {new Date((lead.risk_pulses ?? [])[0].detected_at).toLocaleString()}
-            </p>
-          )}
-          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-            <button
-              type="button"
-              onClick={() => handleMarkLifecycle("recovered")}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleMarkLifecycle("recovered");
-                }
+      {lead.lifecycle_state === "at_risk" && activePulse && (
+        <div style={{ marginBottom: "1rem" }}>
+          <AtRiskPulseBanner
+            variant="inline"
+            state={activePulse.status === "resolved" ? "resolved" : activePulse.status === "acknowledged" ? "acknowledged" : "escalated"}
+            reason={`${activePulse.reason} · Detected ${new Date(activePulse.detected_at).toLocaleString()}`}
+            detectedAt={activePulse.detected_at}
+            primaryAction={{
+              label: markingLifecycle ? "Updating..." : "Mark recovered",
+              onClick: () => handleMarkLifecycle("recovered"),
+              disabled: markingLifecycle,
+            }}
+            secondaryActions={[
+              {
+                label: markingLifecycle ? "Updating..." : "Mark lost",
+                onClick: () => handleMarkLifecycle("lost"),
+                disabled: markingLifecycle,
+              },
+            ]}
+          >
+            <ConciergeReplyComposer
+              mode="full"
+              tone={tone}
+              confidence={confidenceMarker}
+              status={composerStatus}
+              draft={draft}
+              needsApproval={needsApproval}
+              approved={approved}
+              generating={generating}
+              sending={sending}
+              errorMessage={replyError}
+              onDraftChange={(value) => {
+                setDraft(value);
+                setLastSendSuccess(false);
               }}
-              disabled={markingLifecycle}
-              aria-label="Mark as Recovered"
-              style={{
-                padding: "0.4rem 0.75rem",
-                fontSize: "0.875rem",
-                border: "1px solid rgba(128,128,128,0.4)",
-                borderRadius: 6,
-                background: "var(--background)",
-                color: "var(--foreground)",
-                cursor: markingLifecycle ? "not-allowed" : "pointer",
-              }}
-            >
-              {markingLifecycle ? "Updating…" : "Mark Recovered"}
-            </button>
-            <button
-              type="button"
-              onClick={() => handleMarkLifecycle("lost")}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleMarkLifecycle("lost");
-                }
-              }}
-              disabled={markingLifecycle}
-              aria-label="Mark as Lost"
-              style={{
-                padding: "0.4rem 0.75rem",
-                fontSize: "0.875rem",
-                border: "1px solid rgba(128,128,128,0.4)",
-                borderRadius: 6,
-                background: "var(--background)",
-                color: "var(--foreground)",
-                cursor: markingLifecycle ? "not-allowed" : "pointer",
-              }}
-            >
-              {markingLifecycle ? "Updating…" : "Mark Lost"}
-            </button>
-          </div>
-          <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid rgba(200,100,0,0.3)" }}>
-            <h3 style={{ fontSize: "0.95rem", fontWeight: 600, marginBottom: "0.5rem" }}>Concierge Reply</h3>
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              placeholder="Generate or edit your recovery message…"
-              aria-label="Reply draft"
-              rows={4}
-              style={{
-                width: "100%",
-                padding: "0.5rem",
-                fontSize: "0.875rem",
-                border: "1px solid rgba(128,128,128,0.4)",
-                borderRadius: 6,
-                background: "var(--background)",
-                color: "var(--foreground)",
-                resize: "vertical",
-              }}
+              onGenerate={handleGenerateDraft}
+              onApprove={handleApprove}
+              onSend={handleSend}
+              onToneChange={setTone}
             />
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.5rem" }}>
-              <button
-                type="button"
-                onClick={handleGenerateDraft}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleGenerateDraft();
-                  }
-                }}
-                disabled={generating}
-                aria-label="Generate recovery draft"
-                style={{
-                  padding: "0.4rem 0.75rem",
-                  fontSize: "0.875rem",
-                  border: "1px solid rgba(128,128,128,0.4)",
-                  borderRadius: 6,
-                  background: "var(--background)",
-                  color: "var(--foreground)",
-                  cursor: generating ? "not-allowed" : "pointer",
-                }}
-              >
-                {generating ? "Generating…" : "Generate draft"}
-              </button>
-              {replyError && replyErrorSource === "generate" && (
-                <button
-                  type="button"
-                  onClick={handleGenerateDraft}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      handleGenerateDraft();
-                    }
-                  }}
-                  disabled={generating}
-                  aria-label="Retry draft generation"
-                  style={{
-                    padding: "0.4rem 0.75rem",
-                    fontSize: "0.875rem",
-                    border: "1px solid rgba(220,50,50,0.5)",
-                    borderRadius: 6,
-                    background: "rgba(220,50,50,0.1)",
-                    color: "var(--foreground)",
-                    cursor: generating ? "not-allowed" : "pointer",
-                  }}
-                >
-                  Retry
-                </button>
-              )}
-              {needsApproval && (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleApprove}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        handleApprove();
-                      }
-                    }}
-                    disabled={sending || !draft.trim()}
-                    aria-label="Approve draft"
-                    style={{
-                      padding: "0.4rem 0.75rem",
-                      fontSize: "0.875rem",
-                      border: "1px solid rgba(128,128,128,0.4)",
-                      borderRadius: 6,
-                      background: "var(--background)",
-                      color: "var(--foreground)",
-                      cursor: sending || !draft.trim() ? "not-allowed" : "pointer",
-                    }}
-                  >
-                    {sending ? "…" : "Approve"}
-                  </button>
-                  <span style={{ fontSize: "0.75rem", opacity: 0.8, alignSelf: "center" }}>
-                    {approved ? "✓ Approved" : "Approval required before send"}
-                  </span>
-                </>
-              )}
-              <button
-                type="button"
-                onClick={handleSend}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleSend();
-                  }
-                }}
-                disabled={sending || !draft.trim() || (needsApproval && !approved)}
-                aria-label="Send reply"
-                style={{
-                  padding: "0.4rem 0.75rem",
-                  fontSize: "0.875rem",
-                  border: "1px solid rgba(128,128,128,0.4)",
-                  borderRadius: 6,
-                  background: "var(--background)",
-                  color: "var(--foreground)",
-                  cursor: sending || !draft.trim() || (needsApproval && !approved) ? "not-allowed" : "pointer",
-                }}
-              >
-                {sending ? "Sending…" : "Send"}
-              </button>
-            </div>
-            {replyError && (
-              <p style={{ margin: "0.5rem 0 0", fontSize: "0.875rem", color: "crimson" }}>
-                {replyError}
-              </p>
-            )}
-          </div>
+          </AtRiskPulseBanner>
         </div>
       )}
       {lead.lifecycle_state === "recovered" && (
@@ -888,30 +747,7 @@ export default function LeadDetailPage() {
           <dd style={{ margin: 0 }}>{new Date(lead.created_at).toLocaleString()}</dd>
         </dl>
       </div>
-      <div
-        style={{
-          padding: "1rem",
-          border: "1px solid rgba(128,128,128,0.3)",
-          borderRadius: 8,
-        }}
-      >
-        <h2 style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "0.75rem" }}>
-          Interaction timeline
-        </h2>
-        {timeline.length === 0 ? (
-          <p style={{ margin: 0, fontSize: "0.875rem", opacity: 0.7 }}>
-            No interactions yet.
-          </p>
-        ) : (
-          <ul style={{ margin: 0, paddingLeft: "1.25rem", fontSize: "0.875rem" }}>
-            {timeline.map((i) => (
-              <li key={i.id} style={{ marginBottom: "0.5rem" }}>
-                <strong>{i.event_type}</strong> · {new Date(i.occurred_at).toLocaleString()}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <DecisionTimeline items={timeline} />
     </div>
   );
 }

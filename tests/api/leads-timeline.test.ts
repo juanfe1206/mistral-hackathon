@@ -57,12 +57,48 @@ describe("GET /api/leads/[id]/timeline", () => {
     expect(json.data).toHaveLength(2);
     expect(json.data[0].event_type).toBe("ingested");
     expect(json.data[0].occurred_at).toBe("2024-01-01T10:00:00.000Z");
+    expect(json.data[0].event_label).toBe("Ingested");
+    expect(json.data[0].source).toBe("interaction");
     expect(json.data[1].event_type).toBe("contacted");
     expect(mockGetTimelineForLead).toHaveBeenCalledWith(
       LEAD_ID,
       TENANT_ID,
       { limit: 100, offset: 0 }
     );
+  });
+
+  it("maps governance event fields for auditable timeline entries", async () => {
+    mockGetTimelineForLead.mockResolvedValue([
+      {
+        id: "a1",
+        leadId: LEAD_ID,
+        tenantId: TENANT_ID,
+        eventType: "priority.overridden",
+        occurredAt: new Date("2024-01-03T12:00:00Z"),
+        payload: {
+          lead_id: LEAD_ID,
+          actor_id: "agent-7",
+          reason: "VIP escalation",
+          previous_priority: "high",
+          new_priority: "vip",
+        },
+        createdAt: new Date("2024-01-03T12:00:01Z"),
+      },
+    ]);
+
+    const request = new NextRequest(`http://localhost/api/leads/${LEAD_ID}/timeline`);
+    const response = await GET(request, {
+      params: Promise.resolve({ id: LEAD_ID }),
+    });
+    expect(response.status).toBe(200);
+    const json = await response.json();
+
+    expect(json.data[0].event_label).toBe("Priority Overridden");
+    expect(json.data[0].actor).toBe("agent-7");
+    expect(json.data[0].rationale).toBe("VIP escalation");
+    expect(json.data[0].transition).toBe("Priority: high -> vip");
+    expect(json.data[0].source).toBe("audit");
+    expect(json.data[0].flagged).toBe(true);
   });
 
   it("returns 404 when lead not found", async () => {

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import * as leadRepository from "@/server/repositories/lead-repository";
 import * as interactionRepository from "@/server/repositories/interaction-repository";
 import * as classificationRepository from "@/server/repositories/classification-repository";
+import * as auditRepository from "@/server/repositories/audit-repository";
 import { classifyLead as mistralClassifyLead } from "@/server/services/mistral-classifier";
 
 const DEFAULT_TENANT_NAME = "Default Tenant";
@@ -67,7 +68,34 @@ export async function getTimelineForLead(
   tenantId: string,
   options?: { limit?: number; offset?: number }
 ) {
-  return interactionRepository.findInteractionsByLeadId(leadId, tenantId, options);
+  const requestedLimit = options?.limit ?? 100;
+  const requestedOffset = options?.offset ?? 0;
+  const loadWindow = requestedLimit + requestedOffset;
+
+  const [interactions, governanceEvents] = await Promise.all([
+    interactionRepository.findInteractionsByLeadId(leadId, tenantId, {
+      limit: loadWindow,
+      offset: 0,
+    }),
+    auditRepository.findGovernanceEventsByLeadId(leadId, tenantId, {
+      limit: loadWindow,
+      offset: 0,
+    }),
+  ]);
+
+  const mappedGovernanceEvents = governanceEvents.map((event) => ({
+    id: event.id,
+    leadId,
+    tenantId: event.tenantId,
+    eventType: event.eventType,
+    occurredAt: event.occurredAt,
+    payload: event.payload as Record<string, unknown>,
+    createdAt: event.createdAt,
+  }));
+
+  return [...interactions, ...mappedGovernanceEvents]
+    .sort((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime())
+    .slice(requestedOffset, requestedOffset + requestedLimit);
 }
 
 /**

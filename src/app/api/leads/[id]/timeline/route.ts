@@ -9,6 +9,58 @@ const QuerySchema = z.object({
   offset: z.coerce.number().int().min(0).optional().default(0),
 });
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function toOptionalText(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function toEventLabel(eventType: string): string {
+  return eventType
+    .replace(/[._]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getTransition(eventType: string, payload: Record<string, unknown>): string | null {
+  if (eventType === "priority.overridden") {
+    const from = toOptionalText(payload.previous_priority);
+    const to = toOptionalText(payload.new_priority);
+    if (from && to) return `Priority: ${from} -> ${to}`;
+  }
+
+  if (eventType === "lifecycle.marked") {
+    const to = toOptionalText(payload.lifecycle_state);
+    if (to) return `Lifecycle: at_risk -> ${to}`;
+  }
+
+  if (eventType === "action.approved") return "Draft: generated -> approved";
+  if (eventType === "action.sent") return "Draft: approved -> sent";
+
+  return toOptionalText(payload.transition);
+}
+
+function getActor(payload: Record<string, unknown>): string | null {
+  return (
+    toOptionalText(payload.actor) ??
+    toOptionalText(payload.actor_id) ??
+    toOptionalText(payload.user_id)
+  );
+}
+
+function getRationale(payload: Record<string, unknown>): string | null {
+  return (
+    toOptionalText(payload.reason) ??
+    toOptionalText(payload.rationale) ??
+    toOptionalText(payload.note)
+  );
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -70,7 +122,13 @@ export async function GET(
           lead_id: i.leadId,
           tenant_id: i.tenantId,
           event_type: i.eventType,
+          event_label: toEventLabel(i.eventType),
           occurred_at: i.occurredAt.toISOString(),
+          actor: getActor(asRecord(i.payload)),
+          rationale: getRationale(asRecord(i.payload)),
+          transition: getTransition(i.eventType, asRecord(i.payload)),
+          source: i.eventType.includes(".") ? "audit" : "interaction",
+          flagged: i.eventType === "priority.overridden" || i.eventType === "lifecycle.marked",
           payload: i.payload,
           created_at: i.createdAt.toISOString(),
         })),
