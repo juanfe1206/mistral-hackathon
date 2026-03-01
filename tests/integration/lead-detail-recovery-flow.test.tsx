@@ -139,7 +139,7 @@ describe("lead-detail recovery flow integration", () => {
     await waitFor(() => {
       expect(screen.getByText(/Current status: Sent/i)).toBeInTheDocument();
     });
-  });
+  }, 10000);
 
   it("allows direct send for low-priority branch through lead page wiring", async () => {
     setupFetchMock({

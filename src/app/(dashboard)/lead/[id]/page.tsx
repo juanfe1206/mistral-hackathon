@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { LeadSlaIndicator, type SlaStatusData } from "@/components/SLASafetyIndicator";
 import { AtRiskPulseBanner } from "@/features/risk-pulse/components/AtRiskPulseBanner";
@@ -302,23 +302,33 @@ export default function LeadDetailPage() {
         ? `/triage?${backToTriageParams.toString()}`
         : "/triage";
   const backLabel = from === "at-risk" ? "Back to at-risk" : "Back to triage";
+  const actionButtonStyle: CSSProperties = {
+    padding: "0.4rem 0.75rem",
+    fontSize: "0.875rem",
+    border: "1px solid rgba(128,128,128,0.4)",
+    borderRadius: 6,
+    background: "var(--background)",
+    color: "var(--foreground)",
+    minWidth: 44,
+    minHeight: 44,
+  };
 
   if (loading) {
     return (
-      <div style={{ padding: "1.5rem", maxWidth: 960, margin: "0 auto" }}>
+      <main aria-label="Lead detail" style={{ padding: "1.5rem", maxWidth: 960, margin: "0 auto" }}>
         <p>Loading lead…</p>
-      </div>
+      </main>
     );
   }
 
   if (error || !lead) {
     return (
-      <div style={{ padding: "1.5rem", maxWidth: 960, margin: "0 auto" }}>
+      <main aria-label="Lead detail" style={{ padding: "1.5rem", maxWidth: 960, margin: "0 auto" }}>
         <p style={{ color: "crimson" }}>{error ?? "Lead not found."}</p>
         <Link href={backHref} style={{ color: "var(--foreground)" }}>
           ← {backLabel}
         </Link>
-      </div>
+      </main>
     );
   }
 
@@ -351,7 +361,7 @@ export default function LeadDetailPage() {
           : "generated";
 
   return (
-    <div style={{ padding: "1.5rem", maxWidth: 640, margin: "0 auto" }}>
+    <main aria-label="Lead detail" style={{ padding: "1.5rem", maxWidth: 640, margin: "0 auto" }}>
       {showMistralBanner && (
         <div
           style={{
@@ -389,12 +399,7 @@ export default function LeadDetailPage() {
           }}
           disabled={refreshing}
           style={{
-            padding: "0.4rem 0.75rem",
-            fontSize: "0.875rem",
-            border: "1px solid rgba(128,128,128,0.4)",
-            borderRadius: 6,
-            background: "var(--background)",
-            color: "var(--foreground)",
+            ...actionButtonStyle,
             cursor: refreshing ? "not-allowed" : "pointer",
           }}
         >
@@ -405,12 +410,7 @@ export default function LeadDetailPage() {
           onClick={handleReclassify}
           disabled={reclassifying}
           style={{
-            padding: "0.4rem 0.75rem",
-            fontSize: "0.875rem",
-            border: "1px solid rgba(128,128,128,0.4)",
-            borderRadius: 6,
-            background: "var(--background)",
-            color: "var(--foreground)",
+            ...actionButtonStyle,
             cursor: reclassifying ? "not-allowed" : "pointer",
           }}
         >
@@ -425,12 +425,7 @@ export default function LeadDetailPage() {
             aria-expanded={overrideOpen}
             aria-label="Override priority"
             style={{
-              padding: "0.4rem 0.75rem",
-              fontSize: "0.875rem",
-              border: "1px solid rgba(128,128,128,0.4)",
-              borderRadius: 6,
-              background: "var(--background)",
-              color: "var(--foreground)",
+              ...actionButtonStyle,
               cursor: overriding ? "not-allowed" : "pointer",
             }}
           >
@@ -489,6 +484,7 @@ export default function LeadDetailPage() {
                     width: "100%",
                     padding: "0.35rem 0.5rem",
                     marginBottom: "0.25rem",
+                    minHeight: 44,
                     fontSize: "0.875rem",
                     border: "none",
                     borderRadius: 4,
@@ -645,15 +641,7 @@ export default function LeadDetailPage() {
           <button
             type="button"
             onClick={() => setLifecycleError(null)}
-            style={{
-              padding: "0.4rem 0.75rem",
-              fontSize: "0.875rem",
-              border: "1px solid rgba(128,128,128,0.4)",
-              borderRadius: 6,
-              background: "var(--background)",
-              color: "var(--foreground)",
-              cursor: "pointer",
-            }}
+            style={{ ...actionButtonStyle, cursor: "pointer" }}
           >
             Dismiss
           </button>
@@ -690,15 +678,7 @@ export default function LeadDetailPage() {
           <button
             type="button"
             onClick={() => setOverrideError(null)}
-            style={{
-              padding: "0.4rem 0.75rem",
-              fontSize: "0.875rem",
-              border: "1px solid rgba(128,128,128,0.4)",
-              borderRadius: 6,
-              background: "var(--background)",
-              color: "var(--foreground)",
-              cursor: "pointer",
-            }}
+            style={{ ...actionButtonStyle, cursor: "pointer" }}
           >
             Dismiss
           </button>
@@ -721,15 +701,7 @@ export default function LeadDetailPage() {
               setReclassifyError(null);
               handleReclassify();
             }}
-            style={{
-              padding: "0.4rem 0.75rem",
-              fontSize: "0.875rem",
-              border: "1px solid rgba(128,128,128,0.4)",
-              borderRadius: 6,
-              background: "var(--background)",
-              color: "var(--foreground)",
-              cursor: "pointer",
-            }}
+            style={{ ...actionButtonStyle, cursor: "pointer" }}
           >
             Retry classification
           </button>
@@ -770,6 +742,6 @@ export default function LeadDetailPage() {
         </dl>
       </div>
       <DecisionTimeline items={timeline} />
-    </div>
+    </main>
   );
 }

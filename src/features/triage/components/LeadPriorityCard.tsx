@@ -95,12 +95,22 @@ export function LeadPriorityCard({
   const ariaLabel = `Lead ${lead.source_external_id} from ${lead.source_channel}, priority ${lead.priority}`;
   const showInlinePanel = expanded || selected;
   const leadDetailHref = detailHref ?? `/lead/${lead.id}`;
+  const inlineActionsRegionId = `lead-inline-actions-${lead.id}`;
 
   return (
     <Card
       component="article"
       aria-label={ariaLabel}
+      tabIndex={0}
+      aria-expanded={variant === "compact" ? showInlinePanel : undefined}
+      aria-controls={variant === "compact" ? inlineActionsRegionId : undefined}
       onClick={() => setExpanded((prev) => !prev)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+          event.preventDefault();
+          setExpanded((prev) => !prev);
+        }
+      }}
       sx={{
         border: "2px solid",
         borderColor,
@@ -194,6 +204,7 @@ export function LeadPriorityCard({
       </CardContent>
       {(showInlinePanel || variant !== "compact") && (
         <Box
+          id={inlineActionsRegionId}
           component="div"
           role="region"
           aria-label="Inline actions"

@@ -1,6 +1,6 @@
 # Story 4.5: Responsive and Accessibility Validation
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -25,26 +25,26 @@ so that we can confidently demo on mobile and desktop and meet accessibility com
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Build a responsive validation matrix for core flows (AC: #1, #2)
-  - [ ] Validate `triage`, `at-risk`, and `lead/[id]` at 320, 375, 768, 1024, and 1280 widths
-  - [ ] Confirm CTA order and interaction logic are unchanged across breakpoints
-  - [ ] Confirm no clipping/overflow for reason tags, SLA indicators, pulse banners, and composer controls
-- [ ] Task 2: Enforce mobile touch and layout requirements (AC: #1)
-  - [ ] Verify critical interactive controls are >=44px in mobile variants
-  - [ ] Tighten spacing/layout where needed without introducing a new design system
-  - [ ] Ensure triage hierarchy keeps "Top urgent" visible and scannable on mobile and desktop
-- [ ] Task 3: Validate keyboard and screen-reader behavior in critical flows (AC: #2)
-  - [ ] Verify keyboard-only operation for queue filtering, lead actions, and recovery actions
-  - [ ] Confirm focus visibility/order and escape behavior for overlays/drawers
-  - [ ] Ensure risk/SLA updates are announced with accessible text semantics, not color alone
-- [ ] Task 4: Validate contrast and non-color status cues (AC: #2)
-  - [ ] Confirm warning/error/safe states meet WCAG 2.2 AA contrast expectations
-  - [ ] Confirm icons/labels accompany color for risk and SLA states
-  - [ ] Confirm status text remains understandable in color-blind simulation
-- [ ] Task 5: Add regression tests and validation evidence (AC: #1, #2)
-  - [ ] Add/update component and integration tests for responsive and keyboard behavior
-  - [ ] Add assertions for landmarks/roles/labels on triage and at-risk surfaces
-  - [ ] Add a concise validation checklist artifact documenting pass/fail by breakpoint and a11y scenario
+- [x] Task 1: Build a responsive validation matrix for core flows (AC: #1, #2)
+  - [x] Validate `triage`, `at-risk`, and `lead/[id]` at 320, 375, 768, 1024, and 1280 widths
+  - [x] Confirm CTA order and interaction logic are unchanged across breakpoints
+  - [x] Confirm no clipping/overflow for reason tags, SLA indicators, pulse banners, and composer controls
+- [x] Task 2: Enforce mobile touch and layout requirements (AC: #1)
+  - [x] Verify critical interactive controls are >=44px in mobile variants
+  - [x] Tighten spacing/layout where needed without introducing a new design system
+  - [x] Ensure triage hierarchy keeps "Top urgent" visible and scannable on mobile and desktop
+- [x] Task 3: Validate keyboard and screen-reader behavior in critical flows (AC: #2)
+  - [x] Verify keyboard-only operation for queue filtering, lead actions, and recovery actions
+  - [x] Confirm focus visibility/order and escape behavior for overlays/drawers
+  - [x] Ensure risk/SLA updates are announced with accessible text semantics, not color alone
+- [x] Task 4: Validate contrast and non-color status cues (AC: #2)
+  - [x] Confirm warning/error/safe states meet WCAG 2.2 AA contrast expectations
+  - [x] Confirm icons/labels accompany color for risk and SLA states
+  - [x] Confirm status text remains understandable in color-blind simulation
+- [x] Task 5: Add regression tests and validation evidence (AC: #1, #2)
+  - [x] Add/update component and integration tests for responsive and keyboard behavior
+  - [x] Add assertions for landmarks/roles/labels on triage and at-risk surfaces
+  - [x] Add a concise validation checklist artifact documenting pass/fail by breakpoint and a11y scenario
 
 ## Dev Notes
 
@@ -165,8 +165,8 @@ so that we can confidently demo on mobile and desktop and meet accessibility com
 
 ### Story Completion Status
 
-- **Status:** ready-for-dev
-- **Completion note:** Ultimate context engine analysis completed - comprehensive developer guide created
+- **Status:** review
+- **Completion note:** Responsive/a11y hardening implemented with automated validation and checklist evidence.
 
 ## Dev Agent Record
 
@@ -176,20 +176,29 @@ GPT-5 Codex
 
 ### Debug Log References
 
-- Workflow executed from `_bmad/bmm/workflows/4-implementation/create-story/workflow.yaml`
+- Workflow executed from `_bmad/bmm/workflows/4-implementation/dev-story/workflow.yaml`
 - Target story auto-discovered from `sprint-status.yaml`: `4-5-responsive-and-accessibility-validation`
+- Validation commands: `pnpm test`, `pnpm lint`
 
 ### Completion Notes List
 
-- 2026-03-01: Story created via create-story workflow in automated mode.
-- 2026-03-01: Consolidated context from epics, PRD, architecture, UX design, previous Epic 4 story artifact, and recent git history.
-- 2026-03-01: Added responsive/a11y validation guardrails, implementation boundaries, and testing expectations for Story 4.5.
+- 2026-03-01: Added keyboard operability for compact `LeadPriorityCard` expand/collapse behavior.
+- 2026-03-01: Added semantic main landmark and >=44px touch-target hardening for critical lead-detail controls.
+- 2026-03-01: Added regression assertions for keyboard interaction and lead-detail landmark coverage.
+- 2026-03-01: Added Story 4.5 responsive/a11y validation checklist artifact with breakpoint matrix and accessibility results.
+- 2026-03-01: Full test suite passed (`pnpm test`), lint passed with pre-existing warnings only (`pnpm lint`).
 
 ### File List
 
-- _bmad-output/implementation-artifacts/4-5-responsive-and-accessibility-validation.md (new)
+- _bmad-output/implementation-artifacts/4-5-responsive-and-accessibility-validation.md (modified)
+- _bmad-output/implementation-artifacts/4-5-validation-checklist-2026-03-01.md (new)
 - _bmad-output/implementation-artifacts/sprint-status.yaml (modified, story status)
+- src/features/triage/components/LeadPriorityCard.tsx (modified)
+- src/features/triage/components/LeadPriorityCard.test.tsx (modified)
+- src/app/(dashboard)/lead/[id]/page.tsx (modified)
+- tests/integration/lead-detail-governance-timeline.test.tsx (modified)
+- tests/integration/lead-detail-recovery-flow.test.tsx (modified)
 
 ## Change Log
 
-- 2026-03-01: Story created and set to `ready-for-dev`.
+- 2026-03-01: Implemented responsive/a11y hardening updates, added validation evidence, and moved story to `review`.

@@ -110,6 +110,8 @@ describe("lead detail governance timeline integration", () => {
       expect(screen.getByRole("heading", { name: /Decision timeline/i })).toBeInTheDocument();
     });
 
+    expect(screen.getByRole("main", { name: /Lead detail/i })).toBeInTheDocument();
+
     expect(screen.getByText(/Priority Overridden/i)).toBeInTheDocument();
     expect(screen.getByText(/Action Sent/i)).toBeInTheDocument();
 

@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "@/styles/theme";
 import { LeadPriorityCard } from "./LeadPriorityCard";
@@ -86,5 +86,19 @@ describe("LeadPriorityCard", () => {
     );
     const ids = screen.getAllByText(/wa:123/);
     expect(ids[0]).toBeInTheDocument();
+  });
+
+  it("supports keyboard toggle for inline actions in compact mode", () => {
+    render(
+      <TestWrapper>
+        <LeadPriorityCard lead={mockLead} variant="compact" />
+      </TestWrapper>
+    );
+
+    expect(screen.queryByRole("region", { name: /Inline actions/i })).not.toBeInTheDocument();
+    const card = screen.getAllByRole("article")[0];
+    card.focus();
+    fireEvent.keyDown(card, { key: "Enter", code: "Enter" });
+    expect(screen.getByRole("region", { name: /Inline actions/i })).toBeInTheDocument();
   });
 });
