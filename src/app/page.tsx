@@ -20,9 +20,11 @@ export default function Home() {
             <Chip label="Error" color="error" size="small" />
             <Chip label="Info" color="info" size="small" />
           </Stack>
-          <Button component={Link} href="/triage" variant="contained" color="primary">
-            Open Triage Queue
-          </Button>
+          <Link href="/triage" style={{ textDecoration: "none" }}>
+            <Button variant="contained" color="primary">
+              Open Triage Queue
+            </Button>
+          </Link>
         </Stack>
       </main>
     </Box>
