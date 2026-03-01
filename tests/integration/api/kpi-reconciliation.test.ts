@@ -39,7 +39,7 @@ describe.skipIf(!hasDb)("KPI reconciliation (integration)", () => {
       },
     });
 
-    const lead3 = await prisma.lead.create({
+    await prisma.lead.create({
       data: {
         tenantId: TEST_TENANT_ID,
         sourceChannel: "whatsapp",

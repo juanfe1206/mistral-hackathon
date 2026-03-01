@@ -34,7 +34,6 @@ function contrastRatio(hexForeground: string, hexBackground: string): number {
   return (light + 0.05) / (dark + 0.05);
 }
 
-const WCAG_AA_TEXT_MIN = 4.5;
 const WCAG_AA_LARGE_TEXT_MIN = 3;
 
 describe("theme", () => {

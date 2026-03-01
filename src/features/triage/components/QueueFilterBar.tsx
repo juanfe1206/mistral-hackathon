@@ -69,7 +69,6 @@ export function QueueFilterBar({
   sort,
   onFiltersChange,
   onSortChange,
-  state = "default",
   loading = false,
   noResults = false,
 }: QueueFilterBarProps) {
