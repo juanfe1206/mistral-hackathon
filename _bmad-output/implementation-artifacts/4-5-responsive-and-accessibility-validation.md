@@ -166,7 +166,7 @@ so that we can confidently demo on mobile and desktop and meet accessibility com
 ### Story Completion Status
 
 - **Status:** review
-- **Completion note:** Responsive/a11y hardening implemented with automated validation and checklist evidence.
+- **Completion note:** Responsive/a11y hardening implemented with automated validation and checklist evidence; follow-up fixes applied for all 2026-03-01 code-review findings.
 
 ## Dev Agent Record
 
@@ -187,18 +187,25 @@ GPT-5 Codex
 - 2026-03-01: Added regression assertions for keyboard interaction and lead-detail landmark coverage.
 - 2026-03-01: Added Story 4.5 responsive/a11y validation checklist artifact with breakpoint matrix and accessibility results.
 - 2026-03-01: Full test suite passed (`pnpm test`), lint passed with pre-existing warnings only (`pnpm lint`).
+- 2026-03-01: Fixed touch-target regressions from code review by enforcing 44px minimum on KPI unavailable retry and Settings error retry controls.
+- 2026-03-01: Added regression coverage for touch-target sizing in `KPISummaryPanel` and `SettingsPage` retry paths.
 
 ### File List
 
 - _bmad-output/implementation-artifacts/4-5-responsive-and-accessibility-validation.md (modified)
+- _bmad-output/implementation-artifacts/code-review-4-5-2026-03-01.md (new)
 - _bmad-output/implementation-artifacts/4-5-validation-checklist-2026-03-01.md (new)
 - _bmad-output/implementation-artifacts/sprint-status.yaml (modified, story status)
-- src/features/triage/components/LeadPriorityCard.tsx (modified)
-- src/features/triage/components/LeadPriorityCard.test.tsx (modified)
+- src/app/(dashboard)/insights/page.tsx (modified)
 - src/app/(dashboard)/lead/[id]/page.tsx (modified)
-- tests/integration/lead-detail-governance-timeline.test.tsx (modified)
-- tests/integration/lead-detail-recovery-flow.test.tsx (modified)
+- src/app/(dashboard)/settings/page.tsx (modified)
+- src/app/globals.css (modified)
+- src/components/KPISummaryPanel.tsx (modified)
+- src/components/dashboard/PrimaryNav.tsx (modified)
+- tests/components/KPISummaryPanel.test.tsx (modified)
+- tests/components/SettingsPage.test.tsx (new)
 
 ## Change Log
 
 - 2026-03-01: Implemented responsive/a11y hardening updates, added validation evidence, and moved story to `review`.
+- 2026-03-01: Applied code-review remediation for touch-target compliance and added regression tests; story returned to `review`.

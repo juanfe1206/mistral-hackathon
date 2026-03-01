@@ -23,6 +23,7 @@ describe("KPISummaryPanel", () => {
       "KPIs temporarily unavailable"
     );
     const retryBtn = screen.getByRole("button", { name: /Retry loading KPIs/ });
+    expect(retryBtn).toHaveStyle({ minHeight: "44px" });
     fireEvent.click(retryBtn);
     expect(onRetry).toHaveBeenCalledTimes(1);
   });

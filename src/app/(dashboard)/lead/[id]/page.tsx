@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { LeadSlaIndicator, type SlaStatusData } from "@/components/SLASafetyIndicator";
 import { AtRiskPulseBanner } from "@/features/risk-pulse/components/AtRiskPulseBanner";
@@ -67,6 +67,7 @@ export default function LeadDetailPage() {
   const [lastSendSuccess, setLastSendSuccess] = useState(false);
   const [lastGeneratedDraft, setLastGeneratedDraft] = useState("");
   const [draftEdited, setDraftEdited] = useState(false);
+  const overrideMenuRef = useRef<HTMLDivElement | null>(null);
 
   const loadData = async () => {
     if (!id) return;
@@ -127,8 +128,17 @@ export default function LeadDetailPage() {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOverrideOpen(false);
     };
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (overrideMenuRef.current && !overrideMenuRef.current.contains(event.target as Node)) {
+        setOverrideOpen(false);
+      }
+    };
     document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
   }, [overrideOpen]);
 
   const handleReclassify = async () => {
@@ -361,7 +371,7 @@ export default function LeadDetailPage() {
           : "generated";
 
   return (
-    <main aria-label="Lead detail" style={{ padding: "1.5rem", maxWidth: 640, margin: "0 auto" }}>
+    <main aria-label="Lead detail" style={{ padding: "1.5rem", maxWidth: 960, margin: "0 auto" }}>
       {showMistralBanner && (
         <div
           style={{
@@ -416,7 +426,7 @@ export default function LeadDetailPage() {
         >
           {reclassifying ? "Classifying…" : "Reclassify"}
         </button>
-        <div style={{ position: "relative" }}>
+        <div ref={overrideMenuRef} style={{ position: "relative" }}>
           <button
             type="button"
             onClick={() => setOverrideOpen(!overrideOpen)}

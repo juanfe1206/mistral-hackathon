@@ -2,6 +2,17 @@
 
 /** NFR13: icon + text for each metric; never color-only. */
 
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Skeleton,
+  Stack,
+  Typography,
+} from "@mui/material";
+
 export interface KpiSummaryData {
   recovery_count: number;
   sla_compliance_percent: number | null;
@@ -29,108 +40,65 @@ export function KPISummaryPanel({
 }: KPISummaryPanelProps) {
   if (loading) {
     return (
-      <div
+      <Box
         role="status"
         aria-label="Loading KPI metrics"
-        style={{
+        sx={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-          gap: "1rem",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: 2,
         }}
       >
         {[1, 2, 3, 4].map((i) => (
-          <div
+          <Card
             key={i}
-            style={{
-              padding: "1rem",
-              border: "1px solid rgba(128,128,128,0.3)",
-              borderRadius: 8,
-              minHeight: 72,
-              backgroundColor: "rgba(128,128,128,0.06)",
-            }}
+            variant="outlined"
+            sx={{ minHeight: 96 }}
             aria-hidden="true"
           >
-            <div
-              style={{
-                width: "60%",
-                height: 12,
-                borderRadius: 4,
-                backgroundColor: "rgba(128,128,128,0.2)",
-                marginBottom: "0.5rem",
-              }}
-            />
-            <div
-              style={{
-                width: "40%",
-                height: 20,
-                borderRadius: 4,
-                backgroundColor: "rgba(128,128,128,0.15)",
-              }}
-            />
-          </div>
+            <CardContent>
+              <Skeleton variant="rounded" width="62%" height={14} sx={{ mb: 1 }} />
+              <Skeleton variant="rounded" width="40%" height={30} />
+            </CardContent>
+          </Card>
         ))}
-      </div>
+      </Box>
     );
   }
 
   if (unavailable) {
     return (
-      <div
+      <Alert
+        severity="warning"
         role="alert"
         aria-live="polite"
-        style={{
-          padding: "1rem",
-          border: "1px solid rgba(200, 100, 0, 0.4)",
-          borderRadius: 8,
-          backgroundColor: "rgba(200, 100, 0, 0.08)",
-        }}
+        sx={{ display: "flex", alignItems: "center", gap: 1 }}
       >
-        <span aria-hidden="true" style={{ marginRight: "0.35rem" }}>
-          !
-        </span>
         KPIs temporarily unavailable
         {onRetry && (
-          <button
-            type="button"
+          <Button
+            size="small"
+            variant="outlined"
             onClick={onRetry}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                onRetry();
-              }
-            }}
             aria-label="Retry loading KPIs"
-            style={{
-              marginLeft: "0.5rem",
-              padding: "0.2rem 0.5rem",
-              fontSize: "0.75rem",
-              border: "1px solid rgba(128,128,128,0.4)",
-              borderRadius: 4,
-              background: "var(--background)",
-              color: "var(--foreground)",
-              cursor: "pointer",
-            }}
+            sx={{ ml: "auto", minHeight: 44 }}
           >
             Retry
-          </button>
+          </Button>
         )}
-      </div>
+      </Alert>
     );
   }
 
   if (!summary) {
     return (
-      <div
+      <Box
         role="status"
         aria-label="No KPI data"
-        style={{
-          padding: "1rem",
-          border: "1px solid rgba(128,128,128,0.3)",
-          borderRadius: 8,
-        }}
+        sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}
       >
         No data yet
-      </div>
+      </Box>
     );
   }
 
@@ -174,35 +142,34 @@ export function KPISummaryPanel({
   ];
 
   return (
-    <div
+    <Box
       role="region"
       aria-label="KPI summary"
-      style={{
+      sx={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-        gap: "1rem",
+        gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+        gap: 2,
       }}
     >
       {cards.map((card) => (
-        <div
+        <Card
           key={card.label}
+          variant="outlined"
           role="article"
           aria-label={card.ariaLabel}
-          style={{
-            padding: "1rem",
-            border: "1px solid rgba(128,128,128,0.3)",
-            borderRadius: 8,
-            display: "flex",
-            flexDirection: "column",
-            gap: "0.25rem",
-          }}
         >
-          <span style={{ fontSize: "0.75rem", opacity: 0.8 }}>
-            <span aria-hidden="true">{card.icon}</span> {card.label}
-          </span>
-          <span style={{ fontSize: "1.25rem", fontWeight: 600 }}>{card.value}</span>
-        </div>
+          <CardContent>
+            <Stack spacing={0.75}>
+              <Typography variant="caption" color="text.secondary">
+                <span aria-hidden="true">{card.icon}</span> {card.label}
+              </Typography>
+              <Typography variant="h5" sx={{ fontSize: "1.45rem", fontWeight: 700 }}>
+                {card.value}
+              </Typography>
+            </Stack>
+          </CardContent>
+        </Card>
       ))}
-    </div>
+    </Box>
   );
 }

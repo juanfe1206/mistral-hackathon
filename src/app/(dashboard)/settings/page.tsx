@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Alert, Box, Button, Chip, CircularProgress, Stack, Typography } from "@mui/material";
 
 interface SettingsStatus {
   mistral_configured: boolean;
@@ -12,20 +13,15 @@ interface SettingsStatus {
 
 function StatusBadge({ ok }: { ok: boolean }) {
   return (
-    <span
+    <Chip
       role="status"
       aria-label={ok ? "Configured" : "Not configured"}
-      style={{
-        fontSize: "0.75rem",
-        fontWeight: 600,
-        padding: "0.15rem 0.5rem",
-        borderRadius: 4,
-        backgroundColor: ok ? "rgba(0, 128, 0, 0.15)" : "rgba(128, 128, 128, 0.2)",
-        color: ok ? "inherit" : "rgba(128, 128, 128, 0.9)",
-      }}
-    >
-      {ok ? "✓ Configured" : "Not set"}
-    </span>
+      label={ok ? "Configured" : "Not set"}
+      color={ok ? "success" : "default"}
+      variant={ok ? "filled" : "outlined"}
+      size="small"
+      sx={{ fontWeight: 700 }}
+    />
   );
 }
 
@@ -47,115 +43,104 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div style={{ padding: "1.5rem", maxWidth: 640, margin: "0 auto" }}>
-        <p>Loading settings…</p>
-      </div>
+      <Box sx={{ p: 3, maxWidth: 800, mx: "auto", display: "flex", alignItems: "center", gap: 1.5 }}>
+        <CircularProgress size={20} />
+        <Typography>Loading settings...</Typography>
+      </Box>
     );
   }
 
   if (error || !status) {
     return (
-      <div style={{ padding: "1.5rem", maxWidth: 640, margin: "0 auto" }}>
-        <p style={{ color: "crimson" }}>Error: {error ?? "Could not load settings"}</p>
-      </div>
+      <Box sx={{ p: 3, maxWidth: 800, mx: "auto" }}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Error: {error ?? "Could not load settings"}
+        </Alert>
+        <Button
+          type="button"
+          variant="outlined"
+          onClick={() => window.location.reload()}
+          sx={{ minHeight: 44 }}
+        >
+          Retry
+        </Button>
+      </Box>
     );
   }
 
   return (
-    <div style={{ padding: "1.5rem", maxWidth: 640, margin: "0 auto" }}>
-      <h1 style={{ fontSize: "1.5rem", fontWeight: 600, margin: 0, marginBottom: "1rem" }}>
+    <Box component="main" sx={{ p: 3, maxWidth: 800, mx: "auto" }}>
+      <Typography variant="h5" component="h1" sx={{ fontWeight: 600, mb: 1 }}>
         Settings
-      </h1>
-      <p style={{ color: "var(--foreground)", opacity: 0.8, marginBottom: "1.5rem" }}>
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Configuration status for Mistral Lead Ops
-      </p>
+      </Typography>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
-        }}
-      >
-        <div
-          style={{
-            padding: "1rem",
-            border: "1px solid rgba(128,128,128,0.3)",
-            borderRadius: 8,
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
-            <div>
-              <strong>Mistral API</strong>
-              <p style={{ margin: "0.25rem 0 0", fontSize: "0.875rem", opacity: 0.8 }}>
+      <Stack spacing={2}>
+        <Box sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                Mistral API
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
                 Used for lead classification and recovery draft generation
-              </p>
-            </div>
+              </Typography>
+            </Box>
             <StatusBadge ok={status.mistral_configured} />
-          </div>
-        </div>
+          </Stack>
+        </Box>
 
-        <div
-          style={{
-            padding: "1rem",
-            border: "1px solid rgba(128,128,128,0.3)",
-            borderRadius: 8,
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
-            <div>
-              <strong>Database</strong>
-              <p style={{ margin: "0.25rem 0 0", fontSize: "0.875rem", opacity: 0.8 }}>
+        <Box sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                Database
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
                 PostgreSQL connection for leads, interactions, and classifications
-              </p>
-            </div>
+              </Typography>
+            </Box>
             <StatusBadge ok={status.database_configured} />
-          </div>
-        </div>
+          </Stack>
+        </Box>
 
-        <div
-          style={{
-            padding: "1rem",
-            border: "1px solid rgba(128,128,128,0.3)",
-            borderRadius: 8,
-          }}
-        >
-          <div>
-            <strong>At-risk inactivity threshold</strong>
-            <p style={{ margin: "0.25rem 0 0", fontSize: "0.875rem", opacity: 0.8 }}>
-              Leads without contact for this many hours are flagged at-risk
-            </p>
-            <p style={{ margin: "0.5rem 0 0", fontSize: "1rem", fontWeight: 600 }}>
-              {status.risk_inactivity_hours} hours
-            </p>
-          </div>
-        </div>
+        <Box sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            At-risk inactivity threshold
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Leads without contact for this many hours are flagged at-risk
+          </Typography>
+          <Typography variant="h6" sx={{ mt: 1 }}>
+            {status.risk_inactivity_hours} hours
+          </Typography>
+        </Box>
 
-        <div
-          style={{
-            padding: "1rem",
-            border: "1px solid rgba(128,128,128,0.3)",
-            borderRadius: 8,
-          }}
-        >
-          <div>
-            <strong>WhatsApp Webhook</strong>
-            <p style={{ margin: "0.25rem 0 0", fontSize: "0.875rem", opacity: 0.8 }}>
-              For lead ingestion from WhatsApp Business API
-            </p>
-            <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-              <StatusBadge ok={status.whatsapp_webhook_verify_token_set} />
-              <span style={{ fontSize: "0.8rem", opacity: 0.8 }}>Verify token</span>
-              <StatusBadge ok={status.whatsapp_webhook_secret_set} />
-              <span style={{ fontSize: "0.8rem", opacity: 0.8 }}>App secret</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        <Box sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            WhatsApp Webhook
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            For lead ingestion from WhatsApp Business API
+          </Typography>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap alignItems="center">
+            <Typography variant="caption" color="text.secondary">
+              Verify token
+            </Typography>
+            <StatusBadge ok={status.whatsapp_webhook_verify_token_set} />
+            <Typography variant="caption" color="text.secondary">
+              App secret
+            </Typography>
+            <StatusBadge ok={status.whatsapp_webhook_secret_set} />
+          </Stack>
+        </Box>
+      </Stack>
 
-      <p style={{ marginTop: "1.5rem", fontSize: "0.8rem", opacity: 0.7 }}>
-        Configure via <code style={{ background: "rgba(128,128,128,0.2)", padding: "0.1rem 0.3rem", borderRadius: 4 }}>.env</code> or <code style={{ background: "rgba(128,128,128,0.2)", padding: "0.1rem 0.3rem", borderRadius: 4 }}>.env.local</code>. See <code style={{ background: "rgba(128,128,128,0.2)", padding: "0.1rem 0.3rem", borderRadius: 4 }}>.env.example</code> for reference.
-      </p>
-    </div>
+      <Typography variant="caption" color="text.secondary" sx={{ mt: 3, display: "block" }}>
+        Configure via <code>.env</code> or <code>.env.local</code>. See <code>.env.example</code> for reference.
+      </Typography>
+    </Box>
   );
 }
