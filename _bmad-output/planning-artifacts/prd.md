@@ -283,6 +283,8 @@ Proyecto Mistral Hackathon is a SaaS B2B product for small salon teams that need
 - Human approval gate for VIP/high-risk sends.
 - Basic KPI panel (recovery count, first-response SLA, queue aging).
 
+UI and interaction patterns must align with the UX Design Specification for MVP demo (design system, custom triage/risk components, and accessibility baseline).
+
 **MVP Scope Guardrails (Out of Scope):**
 - Multi-channel connectors beyond WhatsApp.
 - Full team assignment and advanced RBAC workflows.

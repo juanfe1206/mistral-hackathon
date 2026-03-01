@@ -90,6 +90,10 @@ Users can prioritize leads with explainable AI, intervene with overrides, and ex
 Users can monitor urgent SLA risk and KPI outcomes to demonstrate business impact clearly.
 **FRs covered:** FR11, FR12
 
+### Epic 4: UX & Design Alignment
+Users experience the product as specified in the UX Design Specification: premium-concierge theme, custom triage and risk components, consistent visual hierarchy, and accessibility compliance, so that the prototype is demo-ready and matches agreed design direction.
+**Design spec alignment:** UX Design Specification (design system, Hybrid Command + Signal Board + Premium Calm, custom components Phases 1–3).
+
 ## Epic 1: MVP Foundation, Ingestion, and Ranked Queue
 
 Users can run the product foundation and process WhatsApp leads in a ranked operational queue with persistent lead history.
@@ -263,3 +267,120 @@ So that I can evaluate MVP impact in daily use and demo presentation.
 **When** the KPI panel loads
 **Then** a no-data state is shown for that metric
 **And** the panel still loads within MVP performance targets
+
+## Epic 4: UX & Design Alignment
+
+Users experience the product as specified in the UX Design Specification: premium-concierge theme, custom triage and risk components, consistent visual hierarchy, and accessibility compliance, so that the prototype is demo-ready and matches agreed design direction.
+
+**Design spec alignment:** UX Design Specification (design system, Hybrid Command + Signal Board + Premium Calm, custom components Phases 1–3).
+
+### Story 4.0: Apply Design System Foundation
+
+As a developer,
+I want the app to use the agreed design tokens and MUI theme from the UX spec,
+So that all screens share the premium-concierge visual foundation.
+
+**Acceptance Criteria:**
+
+**Given** the UX Design Specification design system section
+**When** the design system foundation is implemented
+**Then** Editorial Premium color tokens (Primary, Accent, Surface, Text) are applied
+**And** typography uses Plus Jakarta Sans (headings) and Inter (body)
+**And** spacing follows the 8px base unit and layout grid (12-col desktop, 4-col mobile)
+
+**Given** MUI is the component base
+**When** theme is configured
+**Then** custom token layer overrides default Material styling
+**And** status semantics (success, warning, error, info) are defined and accessible
+
+### Story 4.1: Implement Phase 1 Journey Components
+
+As a salon operator,
+I want triage queue and filters to match the UX spec (LeadPriorityCard, QueueFilterBar, SLASafetyIndicator),
+So that I can identify top urgent leads quickly with clear hierarchy and feedback.
+
+**Acceptance Criteria:**
+
+**Given** the UX spec component definitions for LeadPriorityCard, QueueFilterBar, SLASafetyIndicator
+**When** Phase 1 components are implemented
+**Then** LeadPriorityCard shows lead identity, urgency level, reason tags, SLA hint, and quick actions with specified states/variants
+**And** QueueFilterBar provides filter chips, sort selector, and instant-apply behavior
+**And** SLASafetyIndicator shows status chip, trend, and time-to-breach with non-color cues
+
+**Given** core triage workflows
+**When** I use the queue
+**Then** components meet accessibility requirements (keyboard, aria-labels, focus, touch targets)
+**And** compact (mobile) and standard (desktop) variants behave per spec
+
+### Story 4.2: Implement Phase 2 Risk & Recovery Components
+
+As a salon operator,
+I want at-risk pulse and reply composer to match the UX spec (AtRiskPulseBanner, ConciergeReplyComposer),
+So that risk escalation and recovery actions feel clear and premium.
+
+**Acceptance Criteria:**
+
+**Given** the UX spec for AtRiskPulseBanner and ConciergeReplyComposer
+**When** Phase 2 components are implemented
+**Then** AtRiskPulseBanner surfaces pulse indicator, risk cause, elapsed time, and recovery CTA with correct states
+**And** ConciergeReplyComposer supports draft, tone, confidence marker, and approve/send with policy gate behavior
+
+**Given** at-risk and reply flows
+**When** I use these components
+**Then** accessibility (labels, keyboard shortcuts, status announcements) matches spec
+**And** variants (inline vs modal, quick vs full mode) work per breakpoint
+
+### Story 4.3: Implement Phase 3 Governance Component
+
+As a salon operator or support user,
+I want the decision timeline to match the UX spec (DecisionTimeline),
+So that override, approval, and send history are auditable and clear.
+
+**Acceptance Criteria:**
+
+**Given** the UX spec for DecisionTimeline
+**When** the component is implemented
+**Then** timestamped events show actor, decision rationale, and state transition
+**And** compact and audit-mode variants are available
+**And** expandable entries and filter by event type work as specified
+
+**Given** lead detail or support context
+**When** I view the timeline
+**Then** semantic list and aria-expanded behavior meet accessibility requirements
+
+### Story 4.4: Align Triage and At-Risk Flows to Spec
+
+As a salon operator,
+I want the triage and at-risk views to use the new components and one-surface actioning,
+So that the experience matches the UX spec's flows and feedback patterns.
+
+**Acceptance Criteria:**
+
+**Given** Phase 1–3 components are available
+**When** triage queue and at-risk views are updated
+**Then** lead cards, filter bar, and SLA indicators are used consistently
+**And** at-risk pulse and reply composer are integrated into the flows
+**And** reason tags, feedback (success/warning/error), and action proximity follow the spec
+
+**Given** the "top 3 urgent leads in under 10 seconds" goal
+**When** I open the app
+**Then** default view and interaction cost align with UX spec flow optimization principles
+
+### Story 4.5: Responsive and Accessibility Validation
+
+As a product owner,
+I want the prototype validated for responsive behavior and WCAG 2.2 AA,
+So that we can confidently demo on mobile and desktop and meet accessibility commitments.
+
+**Acceptance Criteria:**
+
+**Given** breakpoint strategy (mobile 320–767, tablet 768–1023, desktop 1024+)
+**When** views are tested across breakpoints
+**Then** layout and interaction logic are consistent and meet spec
+**And** touch targets are at least 44px on mobile
+
+**Given** WCAG 2.2 AA and UX spec accessibility baseline
+**When** accessibility is validated
+**Then** contrast, keyboard operability, and non-color status cues are confirmed
+**And** screen-reader announcements for risk/SLA updates work
+**And** the "top 3 in 10 seconds" scenario is validated on desktop and mobile
