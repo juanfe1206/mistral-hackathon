@@ -58,10 +58,8 @@ This project was planned and implemented using **BMAD** (Build Method for AI-Ass
 
 | Location | Contents |
 |----------|----------|
-| `_bmad/` | BMAD framework: workflows (analysis, plan, solutioning, implementation), agents, core tasks, and config. |
 | `_bmad-output/planning-artifacts/` | Product brief, PRD, UX design spec, architecture, epics. |
 | `_bmad-output/implementation-artifacts/` | Story files, sprint status, code reviews, retrospectives. |
-| `.cursor/commands/` | Cursor commands that invoke BMAD workflows and agents (e.g. `bmad-bmm-create-story`, `bmad-agent-bmm-tech-writer`). |
 
 If you use Cursor, you can run BMAD workflows yourself (e.g. create a new story, run a code review, or open the Tech Writer agent) via the command palette and the commands under `.cursor/commands/`.
 
