@@ -2,13 +2,22 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import {
+  QueueSlaIndicator,
+  LeadSlaIndicator,
+  type SlaStatusData,
+  type QueueSlaSummary,
+} from "@/components/SLASafetyIndicator";
 
 interface Lead {
   id: string;
   source_channel: string;
   source_external_id: string;
   priority: "vip" | "high" | "low";
+  lifecycle_state?: "default" | "at_risk" | "recovered" | "lost";
+  reason_tags: string[];
   created_at: string;
+  sla_status?: SlaStatusData | null;
 }
 
 interface IngestionFailure {
@@ -22,20 +31,25 @@ interface IngestionFailure {
 export default function TriagePage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [failures, setFailures] = useState<IngestionFailure[]>([]);
+  const [slaSummary, setSlaSummary] = useState<QueueSlaSummary | null>(null);
+  const [slaUnavailable, setSlaUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadData = async () => {
     setLoading(true);
     setError(null);
+    setSlaUnavailable(false);
     try {
-      const [leadsRes, failuresRes] = await Promise.all([
+      const [leadsRes, failuresRes, slaRes] = await Promise.all([
         fetch("/api/leads"),
         fetch("/api/ingestion-failures?limit=10"),
+        fetch("/api/sla"),
       ]);
-      const [leadsJson, failuresJson] = await Promise.all([
+      const [leadsJson, failuresJson, slaJson] = await Promise.all([
         leadsRes.json(),
         failuresRes.json(),
+        slaRes.json(),
       ]);
       if (!leadsRes.ok || leadsJson.error) {
         setError(leadsJson.error?.message ?? "Request failed");
@@ -45,8 +59,14 @@ export default function TriagePage() {
       if (failuresRes.ok && failuresJson.data?.length) {
         setFailures(failuresJson.data);
       }
+      if (slaRes.ok && slaJson.data?.queue_summary) {
+        setSlaSummary(slaJson.data.queue_summary);
+      } else {
+        setSlaUnavailable(true);
+      }
     } catch (err) {
       setError(String(err));
+      setSlaUnavailable(true);
     } finally {
       setLoading(false);
     }
@@ -74,10 +94,15 @@ export default function TriagePage() {
 
   return (
     <div style={{ padding: "1.5rem", maxWidth: 960, margin: "0 auto" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>
         <h1 style={{ fontSize: "1.5rem", fontWeight: 600, margin: 0 }}>
           Triage Queue
         </h1>
+        <QueueSlaIndicator
+          summary={slaSummary}
+          unavailable={slaUnavailable}
+          onRetry={loadData}
+        />
         <button
           type="button"
           onClick={loadData}
@@ -146,6 +171,62 @@ export default function TriagePage() {
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                {lead.lifecycle_state === "at_risk" && (
+                  <span
+                    role="status"
+                    aria-label="At-risk lead"
+                    style={{
+                      fontSize: "0.7rem",
+                      fontWeight: 600,
+                      padding: "0.15rem 0.4rem",
+                      borderRadius: 4,
+                      backgroundColor: "rgba(200, 100, 0, 0.2)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.25rem",
+                    }}
+                  >
+                    <span aria-hidden="true">⚠</span>
+                    At-Risk
+                  </span>
+                )}
+                {lead.lifecycle_state === "recovered" && (
+                  <span
+                    role="status"
+                    aria-label="Recovered lead"
+                    style={{
+                      fontSize: "0.7rem",
+                      fontWeight: 600,
+                      padding: "0.15rem 0.4rem",
+                      borderRadius: 4,
+                      backgroundColor: "rgba(0, 128, 0, 0.15)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.25rem",
+                    }}
+                  >
+                    <span aria-hidden="true">✓</span>
+                    Recovered
+                  </span>
+                )}
+                {lead.lifecycle_state === "lost" && (
+                  <span
+                    role="status"
+                    aria-label="Lost lead"
+                    style={{
+                      fontSize: "0.7rem",
+                      fontWeight: 600,
+                      padding: "0.15rem 0.4rem",
+                      borderRadius: 4,
+                      backgroundColor: "rgba(128, 128, 128, 0.2)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.25rem",
+                    }}
+                  >
+                    Lost
+                  </span>
+                )}
                 <span
                   style={{
                     fontSize: "0.7rem",
@@ -166,6 +247,22 @@ export default function TriagePage() {
                 <span style={{ fontWeight: 600 }}>
                   {lead.source_external_id} · {lead.source_channel}
                 </span>
+                {lead.sla_status && (
+                  <LeadSlaIndicator slaStatus={lead.sla_status} compact />
+                )}
+                {(lead.reason_tags ?? []).slice(0, 2).map((tag) => (
+                  <span
+                    key={tag}
+                    style={{
+                      fontSize: "0.65rem",
+                      padding: "0.1rem 0.35rem",
+                      borderRadius: 4,
+                      backgroundColor: "rgba(128, 128, 128, 0.15)",
+                    }}
+                  >
+                    {tag}
+                  </span>
+                ))}
               </div>
               <div style={{ fontSize: "0.875rem", opacity: 0.7 }}>
                 {new Date(lead.created_at).toLocaleString()}

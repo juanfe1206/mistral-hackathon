@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createErrorResponse, createSuccessResponse } from "@/server/api/error-envelope";
 import { isValidUuid } from "@/lib/uuid";
 import * as leadService from "@/server/services/lead-service";
+import * as slaService from "@/server/services/sla-service";
 
 export async function GET(request: NextRequest) {
   const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();
@@ -18,18 +19,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const leads = await leadService.findLeadsByTenant(tenantId, { limit: 100 });
+    const leadsWithSla = await slaService.getLeadsWithSlaStatus(tenantId, { limit: 100 });
     return NextResponse.json(
       createSuccessResponse(
-        leads.map((l) => ({
-          id: l.id,
-          tenant_id: l.tenantId,
-          source_channel: l.sourceChannel,
-          source_external_id: l.sourceExternalId,
-          source_metadata: l.sourceMetadata,
-          priority: l.priority,
-          created_at: l.createdAt.toISOString(),
-        })),
+        leadsWithSla.map(({ lead: l, sla_status }) => {
+          const latest = l.classifications?.[0];
+          return {
+            id: l.id,
+            tenant_id: l.tenantId,
+            source_channel: l.sourceChannel,
+            source_external_id: l.sourceExternalId,
+            source_metadata: l.sourceMetadata,
+            priority: l.priority,
+            lifecycle_state: l.lifecycleState,
+            reason_tags: (latest?.reasonTags as string[]) ?? [],
+            created_at: l.createdAt.toISOString(),
+            sla_status,
+          };
+        }),
         requestId
       )
     );

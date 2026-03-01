@@ -86,6 +86,7 @@ function extractAllSourceMetadata(payload: WhatsAppWebhook): {
             contact_name: contact?.profile?.name ?? null,
             phone_number_id: value.metadata?.phone_number_id ?? null,
             display_phone_number: value.metadata?.display_phone_number ?? null,
+            text_body: msg.text?.body ?? null,
           },
         });
       }
@@ -174,6 +175,21 @@ export async function POST(request: NextRequest) {
         sourceMetadata: meta.sourceMetadata,
         initialInteractionOccurredAt,
       });
+
+      try {
+        const classification = await leadService.classifyAndPersistForLead(lead.id, tenantId);
+        console.info(`[${requestId}] lead.classified`, {
+          event_name: "lead.classified",
+          event_version: 1,
+          occurred_at: new Date().toISOString(),
+          tenant_id: tenantId,
+          correlation_id: requestId,
+          payload: { lead_id: lead.id, priority: classification.priority, reason_tags: classification.reasonTags },
+        });
+      } catch (classifyErr) {
+        console.error(`[${requestId}] Classification failed for lead ${lead.id}`, classifyErr);
+        // Lead created; classification failed. UI can retry via reclassify endpoint (NFR10).
+      }
 
       // Emit lead.ingested (log for now if event infra deferred)
       console.info(`[${requestId}] lead.ingested: leadId=${lead.id} tenantId=${tenantId}`, {

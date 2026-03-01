@@ -16,3 +16,31 @@ export const LeadPriority = {
 } as const
 
 export type LeadPriority = (typeof LeadPriority)[keyof typeof LeadPriority]
+
+
+export const LeadLifecycleState = {
+  default: 'default',
+  at_risk: 'at_risk',
+  recovered: 'recovered',
+  lost: 'lost'
+} as const
+
+export type LeadLifecycleState = (typeof LeadLifecycleState)[keyof typeof LeadLifecycleState]
+
+
+export const RiskPulseStatus = {
+  active: 'active',
+  recovered: 'recovered',
+  lost: 'lost'
+} as const
+
+export type RiskPulseStatus = (typeof RiskPulseStatus)[keyof typeof RiskPulseStatus]
+
+
+export const ReplyDraftStatus = {
+  draft: 'draft',
+  approved: 'approved',
+  sent: 'sent'
+} as const
+
+export type ReplyDraftStatus = (typeof ReplyDraftStatus)[keyof typeof ReplyDraftStatus]

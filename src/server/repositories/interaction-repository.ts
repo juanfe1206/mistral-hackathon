@@ -32,3 +32,15 @@ export async function findInteractionsByLeadId(
     skip: options?.offset ?? 0,
   });
 }
+
+/**
+ * Get the latest (most recent) interaction for a lead by occurred_at.
+ * Used for at-risk detection (last contact timestamp).
+ */
+export async function findLatestInteractionForLead(leadId: string, tenantId: string) {
+  return prisma.interaction.findFirst({
+    where: { leadId, tenantId },
+    orderBy: { occurredAt: "desc" },
+    take: 1,
+  });
+}

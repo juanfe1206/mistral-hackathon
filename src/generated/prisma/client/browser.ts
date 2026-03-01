@@ -33,6 +33,31 @@ export type Lead = Prisma.LeadModel
  */
 export type Interaction = Prisma.InteractionModel
 /**
+ * Model Classification
+ * 
+ */
+export type Classification = Prisma.ClassificationModel
+/**
+ * Model PriorityOverride
+ * 
+ */
+export type PriorityOverride = Prisma.PriorityOverrideModel
+/**
+ * Model AuditEvent
+ * 
+ */
+export type AuditEvent = Prisma.AuditEventModel
+/**
+ * Model RiskPulse
+ * 
+ */
+export type RiskPulse = Prisma.RiskPulseModel
+/**
+ * Model ReplyDraft
+ * 
+ */
+export type ReplyDraft = Prisma.ReplyDraftModel
+/**
  * Model IngestionFailure
  * 
  */

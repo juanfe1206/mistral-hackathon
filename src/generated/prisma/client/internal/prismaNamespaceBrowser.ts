@@ -54,6 +54,11 @@ export const ModelName = {
   Tenant: 'Tenant',
   Lead: 'Lead',
   Interaction: 'Interaction',
+  Classification: 'Classification',
+  PriorityOverride: 'PriorityOverride',
+  AuditEvent: 'AuditEvent',
+  RiskPulse: 'RiskPulse',
+  ReplyDraft: 'ReplyDraft',
   IngestionFailure: 'IngestionFailure'
 } as const
 
@@ -89,6 +94,7 @@ export const LeadScalarFieldEnum = {
   sourceExternalId: 'sourceExternalId',
   sourceMetadata: 'sourceMetadata',
   priority: 'priority',
+  lifecycleState: 'lifecycleState',
   createdAt: 'createdAt'
 } as const
 
@@ -106,6 +112,75 @@ export const InteractionScalarFieldEnum = {
 } as const
 
 export type InteractionScalarFieldEnum = (typeof InteractionScalarFieldEnum)[keyof typeof InteractionScalarFieldEnum]
+
+
+export const ClassificationScalarFieldEnum = {
+  id: 'id',
+  leadId: 'leadId',
+  tenantId: 'tenantId',
+  priority: 'priority',
+  reasonTags: 'reasonTags',
+  modelVersion: 'modelVersion',
+  createdAt: 'createdAt'
+} as const
+
+export type ClassificationScalarFieldEnum = (typeof ClassificationScalarFieldEnum)[keyof typeof ClassificationScalarFieldEnum]
+
+
+export const PriorityOverrideScalarFieldEnum = {
+  id: 'id',
+  leadId: 'leadId',
+  tenantId: 'tenantId',
+  previousPriority: 'previousPriority',
+  newPriority: 'newPriority',
+  actorId: 'actorId',
+  reason: 'reason',
+  createdAt: 'createdAt'
+} as const
+
+export type PriorityOverrideScalarFieldEnum = (typeof PriorityOverrideScalarFieldEnum)[keyof typeof PriorityOverrideScalarFieldEnum]
+
+
+export const AuditEventScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  eventType: 'eventType',
+  actorId: 'actorId',
+  payload: 'payload',
+  occurredAt: 'occurredAt',
+  correlationId: 'correlationId',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditEventScalarFieldEnum = (typeof AuditEventScalarFieldEnum)[keyof typeof AuditEventScalarFieldEnum]
+
+
+export const RiskPulseScalarFieldEnum = {
+  id: 'id',
+  leadId: 'leadId',
+  tenantId: 'tenantId',
+  reason: 'reason',
+  detectedAt: 'detectedAt',
+  status: 'status',
+  createdAt: 'createdAt'
+} as const
+
+export type RiskPulseScalarFieldEnum = (typeof RiskPulseScalarFieldEnum)[keyof typeof RiskPulseScalarFieldEnum]
+
+
+export const ReplyDraftScalarFieldEnum = {
+  id: 'id',
+  leadId: 'leadId',
+  tenantId: 'tenantId',
+  draftText: 'draftText',
+  status: 'status',
+  approvedAt: 'approvedAt',
+  sentAt: 'sentAt',
+  actorId: 'actorId',
+  createdAt: 'createdAt'
+} as const
+
+export type ReplyDraftScalarFieldEnum = (typeof ReplyDraftScalarFieldEnum)[keyof typeof ReplyDraftScalarFieldEnum]
 
 
 export const IngestionFailureScalarFieldEnum = {

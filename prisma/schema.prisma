@@ -25,20 +25,45 @@ enum LeadPriority {
   low
 }
 
-model Lead {
-  id               String       @id @default(uuid()) @db.Uuid
-  tenantId         String       @map("tenant_id") @db.Uuid
-  sourceChannel    String       @map("source_channel")
-  sourceExternalId String       @map("source_external_id")
-  sourceMetadata   Json         @map("source_metadata")
-  priority         LeadPriority @default(low)
-  createdAt        DateTime     @default(now()) @map("created_at")
+enum LeadLifecycleState {
+  default
+  at_risk
+  recovered
+  lost
+}
 
-  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  interactions Interaction[]
+enum RiskPulseStatus {
+  active
+  recovered
+  lost
+}
+
+enum ReplyDraftStatus {
+  draft
+  approved
+  sent
+}
+
+model Lead {
+  id               String             @id @default(uuid()) @db.Uuid
+  tenantId         String             @map("tenant_id") @db.Uuid
+  sourceChannel    String             @map("source_channel")
+  sourceExternalId String             @map("source_external_id")
+  sourceMetadata   Json               @map("source_metadata")
+  priority         LeadPriority       @default(low)
+  lifecycleState   LeadLifecycleState @default(default) @map("lifecycle_state")
+  createdAt        DateTime           @default(now()) @map("created_at")
+
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  interactions      Interaction[]
+  classifications   Classification[]
+  priorityOverrides PriorityOverride[]
+  riskPulses        RiskPulse[]
+  replyDrafts      ReplyDraft[]
 
   @@index([tenantId], name: "idx_leads_tenant_id")
   @@index([tenantId, priority], name: "idx_leads_tenant_id_priority")
+  @@index([lifecycleState], name: "idx_leads_lifecycle_state")
   @@map("leads")
 }
 
@@ -56,6 +81,90 @@ model Interaction {
   @@index([leadId], name: "idx_interactions_lead_id")
   @@index([tenantId], name: "idx_interactions_tenant_id")
   @@map("interactions")
+}
+
+model Classification {
+  id           String       @id @default(uuid()) @db.Uuid
+  leadId       String       @map("lead_id") @db.Uuid
+  tenantId     String       @map("tenant_id") @db.Uuid
+  priority     LeadPriority
+  reasonTags   Json         @map("reason_tags")
+  modelVersion String?      @map("model_version")
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId], name: "idx_classifications_lead_id")
+  @@index([tenantId], name: "idx_classifications_tenant_id")
+  @@map("classifications")
+}
+
+model PriorityOverride {
+  id              String       @id @default(uuid()) @db.Uuid
+  leadId          String       @map("lead_id") @db.Uuid
+  tenantId        String       @map("tenant_id") @db.Uuid
+  previousPriority LeadPriority @map("previous_priority")
+  newPriority     LeadPriority @map("new_priority")
+  actorId         String?      @map("actor_id") @db.Uuid
+  reason          String?
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId], name: "idx_priority_overrides_lead_id")
+  @@index([tenantId], name: "idx_priority_overrides_tenant_id")
+  @@map("priority_overrides")
+}
+
+model AuditEvent {
+  id            String   @id @default(uuid()) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  eventType     String   @map("event_type")
+  actorId       String?  @map("actor_id") @db.Uuid
+  payload       Json     @map("payload")
+  occurredAt    DateTime @map("occurred_at")
+  correlationId String?  @map("correlation_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId], name: "idx_audit_events_tenant_id")
+  @@index([occurredAt], name: "idx_audit_events_occurred_at")
+  @@map("audit_events")
+}
+
+model RiskPulse {
+  id         String          @id @default(uuid()) @db.Uuid
+  leadId     String          @map("lead_id") @db.Uuid
+  tenantId   String          @map("tenant_id") @db.Uuid
+  reason     String
+  detectedAt DateTime        @map("detected_at")
+  status     RiskPulseStatus @default(active)
+  createdAt  DateTime        @default(now()) @map("created_at")
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId], name: "idx_risk_pulses_lead_id")
+  @@index([tenantId], name: "idx_risk_pulses_tenant_id")
+  @@index([status], name: "idx_risk_pulses_status")
+  @@map("risk_pulses")
+}
+
+model ReplyDraft {
+  id         String           @id @default(uuid()) @db.Uuid
+  leadId     String           @map("lead_id") @db.Uuid
+  tenantId   String           @map("tenant_id") @db.Uuid
+  draftText  String           @map("draft_text")
+  status     ReplyDraftStatus @default(draft)
+  approvedAt DateTime?        @map("approved_at")
+  sentAt     DateTime?        @map("sent_at")
+  actorId    String?          @map("actor_id") @db.Uuid
+  createdAt  DateTime         @default(now()) @map("created_at")
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId], name: "idx_reply_drafts_lead_id")
+  @@index([tenantId], name: "idx_reply_drafts_tenant_id")
+  @@index([status], name: "idx_reply_drafts_status")
+  @@map("reply_drafts")
 }
 
 model IngestionFailure {

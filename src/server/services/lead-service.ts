@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db";
 import * as leadRepository from "@/server/repositories/lead-repository";
 import * as interactionRepository from "@/server/repositories/interaction-repository";
+import * as classificationRepository from "@/server/repositories/classification-repository";
+import { classifyLead as mistralClassifyLead } from "@/server/services/mistral-classifier";
 
 const DEFAULT_TENANT_NAME = "Default Tenant";
 
@@ -66,6 +68,53 @@ export async function getTimelineForLead(
   options?: { limit?: number; offset?: number }
 ) {
   return interactionRepository.findInteractionsByLeadId(leadId, tenantId, options);
+}
+
+/**
+ * Classify a lead via Mistral and persist the result.
+ * Updates lead.priority and creates a classification record.
+ * @throws Error when Mistral API fails (caller should handle for NFR10 retry)
+ */
+export async function classifyAndPersistForLead(leadId: string, tenantId: string) {
+  const lead = await leadRepository.findLeadById(leadId, tenantId);
+  if (!lead) throw new Error(`Lead ${leadId} not found`);
+
+  const interactions = await interactionRepository.findInteractionsByLeadId(leadId, tenantId, {
+    limit: 5,
+  });
+  const parts = interactions.map((i) => {
+    const p = i.payload as Record<string, unknown>;
+    const text = p?.text_body ?? p?.body ?? (typeof p === "object" ? i.eventType : "");
+    return `${i.eventType}: ${String(text).slice(0, 200)}`;
+  });
+  const interactionsSummary = parts.length > 0 ? parts.join("; ") : "No interactions yet";
+
+  const context = {
+    sourceChannel: lead.sourceChannel,
+    sourceMetadata: (lead.sourceMetadata ?? {}) as Record<string, unknown>,
+    interactionsSummary,
+  };
+
+  const result = await mistralClassifyLead(context);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.lead.update({
+      where: { id: leadId },
+      data: { priority: result.priority },
+    });
+    await classificationRepository.createClassification(
+      {
+        leadId,
+        tenantId,
+        priority: result.priority,
+        reasonTags: result.reasonTags,
+        modelVersion: "mistral-small-latest",
+      },
+      tx
+    );
+  });
+
+  return result;
 }
 
 export { getOrCreateDefaultTenant };

@@ -4,11 +4,13 @@ import { GET, POST } from "@/app/api/webhooks/whatsapp/route";
 
 const mockCreateLead = vi.fn();
 const mockGetOrCreateDefaultTenant = vi.fn();
+const mockClassifyAndPersistForLead = vi.fn();
 const mockRecordIngestionFailure = vi.fn();
 
 vi.mock("@/server/services/lead-service", () => ({
   createLead: (...args: unknown[]) => mockCreateLead(...args),
   getOrCreateDefaultTenant: () => mockGetOrCreateDefaultTenant(),
+  classifyAndPersistForLead: (...args: unknown[]) => mockClassifyAndPersistForLead(...args),
 }));
 
 vi.mock("@/server/repositories/ingestion-failure-repository", () => ({
@@ -21,6 +23,7 @@ describe("WhatsApp webhook", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetOrCreateDefaultTenant.mockResolvedValue("tenant-uuid-1111-2222-3333-444455556666");
+    mockClassifyAndPersistForLead.mockResolvedValue({ priority: "vip", reasonTags: ["repeat customer"] });
     mockCreateLead.mockResolvedValue({
       id: "lead-uuid-1111-2222-3333-444455556666",
       tenantId: "tenant-uuid-1111-2222-3333-444455556666",
@@ -174,10 +177,45 @@ describe("WhatsApp webhook", () => {
             contact_name: "Jane",
             phone_number_id: "pn123",
             display_phone_number: "15559876543",
+            text_body: "Hello",
           }),
           initialInteractionOccurredAt: new Date(1709308800 * 1000),
         })
       );
+      expect(mockClassifyAndPersistForLead).toHaveBeenCalledWith(
+        "lead-uuid-1111-2222-3333-444455556666",
+        "tenant-uuid-1111-2222-3333-444455556666"
+      );
+    });
+
+    it("returns 200 even when classification fails (NFR10 - retry via reclassify)", async () => {
+      mockClassifyAndPersistForLead.mockRejectedValueOnce(new Error("Mistral API timeout"));
+      process.env.WHATSAPP_APP_SECRET = "my_secret";
+      const body = JSON.stringify({
+        object: "whatsapp_business_account",
+        entry: [
+          {
+            id: "123",
+            changes: [
+              {
+                field: "messages",
+                value: {
+                  messages: [{ from: "15551234567", id: "wamid.1", timestamp: "123" }],
+                },
+              },
+            ],
+          },
+        ],
+      });
+      const sig = `sha256=${createHmac("sha256", "my_secret").update(body).digest("hex")}`;
+      const request = new Request("http://localhost/api/webhooks/whatsapp", {
+        method: "POST",
+        body,
+        headers: { "X-Hub-Signature-256": sig },
+      });
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+      expect(mockCreateLead).toHaveBeenCalledTimes(1);
     });
   });
 
