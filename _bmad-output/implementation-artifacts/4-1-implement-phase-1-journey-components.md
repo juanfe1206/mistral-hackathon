@@ -1,6 +1,6 @@
 # Story 4.1: Implement Phase 1 Journey Components
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
