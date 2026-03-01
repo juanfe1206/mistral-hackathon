@@ -1,6 +1,6 @@
 # Story 4.5: Responsive and Accessibility Validation
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -165,7 +165,7 @@ so that we can confidently demo on mobile and desktop and meet accessibility com
 
 ### Story Completion Status
 
-- **Status:** review
+- **Status:** done
 - **Completion note:** Responsive/a11y hardening implemented with automated validation and checklist evidence; follow-up fixes applied for all 2026-03-01 code-review findings.
 
 ## Dev Agent Record
@@ -209,3 +209,4 @@ GPT-5 Codex
 
 - 2026-03-01: Implemented responsive/a11y hardening updates, added validation evidence, and moved story to `review`.
 - 2026-03-01: Applied code-review remediation for touch-target compliance and added regression tests; story returned to `review`.
+- 2026-03-02: Final review completed; story set to `done` after full test pass and lint cleanup.

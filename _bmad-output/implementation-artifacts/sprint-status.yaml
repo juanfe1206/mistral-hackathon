@@ -58,11 +58,11 @@ development_status:
   3-2-display-kpi-summary-panel-for-mvp-outcomes: done
   epic-3-retrospective: optional
 
-  epic-4: in-progress
+  epic-4: done
   4-0-apply-design-system-foundation: done
   4-1-implement-phase-1-journey-components: done
   4-2-implement-phase-2-risk-recovery-components: done
   4-3-implement-phase-3-governance-component: done
-  4-4-align-triage-and-at-risk-flows-to-spec: review
-  4-5-responsive-and-accessibility-validation: review
+  4-4-align-triage-and-at-risk-flows-to-spec: done
+  4-5-responsive-and-accessibility-validation: done
   epic-4-retrospective: optional

@@ -1,6 +1,6 @@
 # Story 4.4: Align Triage and At-Risk Flows to Spec
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -160,7 +160,7 @@ so that the experience matches the UX spec's flows and feedback patterns.
 
 ### Story Completion Status
 
-- **Status:** review
+- **Status:** done
 - **Completion note:** Implemented flow alignment updates and integration coverage for triage context preservation, at-risk direct recovery routing, and lead detail back-navigation continuity.
 
 ## Dev Agent Record
@@ -216,3 +216,4 @@ GPT-5 Codex
 - 2026-03-01: Story implemented and set to `review`.
 - 2026-03-01: Applied code-review follow-up fixes for triage context restoration and integration coverage; updated traceability notes for concurrent branch edits.
 - 2026-03-01: Added round-trip navigation integration test coverage to close code-review finding on triage context restoration behavior.
+- 2026-03-02: Final review completed; story set to `done` after passing integration coverage and lint checks.
