@@ -179,7 +179,11 @@ export function DecisionTimeline({
                   sx={{ mt: 1 }}
                   onClick={() => toggleExpanded(item.id)}
                   onKeyDown={(event) => {
-                    if (event.key === " " || event.key === "Spacebar") {
+                    if (
+                      event.key === "Enter" ||
+                      event.key === " " ||
+                      event.key === "Spacebar"
+                    ) {
                       event.preventDefault();
                       toggleExpanded(item.id);
                     }

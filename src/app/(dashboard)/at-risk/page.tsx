@@ -121,7 +121,7 @@ export default function AtRiskPage() {
                 leadName={`${displayName} · ${lead?.priority ?? "unknown"}`}
                 primaryAction={{
                   label: "Open recovery",
-                  onClick: () => router.push(`/lead/${pulse.lead_id}`),
+                  onClick: () => router.push(`/lead/${pulse.lead_id}?from=at-risk`),
                 }}
               />
             );

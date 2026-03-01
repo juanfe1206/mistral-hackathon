@@ -9,6 +9,7 @@ const LEAD_ID = "11111111-1111-1111-8111-111111111111";
 
 vi.mock("next/navigation", () => ({
   useParams: () => ({ id: LEAD_ID }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 function jsonResponse(data: unknown, ok = true): Promise<Response> {

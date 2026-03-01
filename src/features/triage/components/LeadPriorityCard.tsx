@@ -42,6 +42,7 @@ export interface LeadPriorityCardProps {
   state?: LeadPriorityCardState;
   selected?: boolean;
   onActionClick?: (leadId: string) => void;
+  detailHref?: string;
 }
 
 
@@ -50,6 +51,7 @@ export function LeadPriorityCard({
   variant = "standard",
   state = "default",
   selected = false,
+  detailHref,
 }: LeadPriorityCardProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -92,6 +94,7 @@ export function LeadPriorityCard({
 
   const ariaLabel = `Lead ${lead.source_external_id} from ${lead.source_channel}, priority ${lead.priority}`;
   const showInlinePanel = expanded || selected;
+  const leadDetailHref = detailHref ?? `/lead/${lead.id}`;
 
   return (
     <Card
@@ -199,7 +202,7 @@ export function LeadPriorityCard({
         >
           <Button
             component={Link}
-            href={`/lead/${lead.id}`}
+            href={leadDetailHref}
             size="small"
             variant="outlined"
             aria-label={`View lead ${lead.source_external_id}`}
@@ -213,7 +216,7 @@ export function LeadPriorityCard({
         <CardActions sx={{ pt: 0, px: 1.5, pb: 1 }}>
           <Button
             component={Link}
-            href={`/lead/${lead.id}`}
+            href={leadDetailHref}
             size="small"
             variant="outlined"
             aria-label={`View lead ${lead.source_external_id}`}

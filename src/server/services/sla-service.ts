@@ -15,6 +15,7 @@ export interface LeadSlaStatus {
   minutes_to_breach: number | null;
   minutes_over: number | null;
   first_response_at: string | null;
+  response_minutes: number | null;
 }
 
 export interface QueueSlaSummary {
@@ -32,24 +33,27 @@ function computeSlaStatus(
   createdAt: Date,
   firstResponseAt: Date | null,
   priority: "vip" | "high" | "low"
-): { status: SlaStatus; minutesToBreach: number | null; minutesOver: number | null } {
+): { status: SlaStatus; minutesToBreach: number | null; minutesOver: number | null; responseMinutes: number | null } {
   if (priority === "low") {
-    return { status: "n_a", minutesToBreach: null, minutesOver: null };
+    return { status: "n_a", minutesToBreach: null, minutesOver: null, responseMinutes: null };
   }
 
   const now = new Date();
   const breachAt = new Date(createdAt.getTime() + TARGET_MINUTES * 60 * 1000);
 
   if (firstResponseAt) {
+    const responseMs = firstResponseAt.getTime() - createdAt.getTime();
+    const responseMinutes = Math.round(responseMs / 60000);
     const respondedInTime = firstResponseAt <= breachAt;
     if (respondedInTime) {
-      return { status: "safe", minutesToBreach: null, minutesOver: null };
+      return { status: "safe", minutesToBreach: null, minutesOver: null, responseMinutes };
     }
     const overMs = firstResponseAt.getTime() - breachAt.getTime();
     return {
       status: "recovering",
       minutesToBreach: null,
       minutesOver: Math.round(overMs / 60000),
+      responseMinutes,
     };
   }
 
@@ -59,17 +63,18 @@ function computeSlaStatus(
       status: "breached",
       minutesToBreach: null,
       minutesOver: Math.round(overMs / 60000),
+      responseMinutes: null,
     };
   }
 
   const minutesLeft = (breachAt.getTime() - now.getTime()) / 60000;
   if (minutesLeft <= BREACH_RISK_MINUTES) {
-    return { status: "breach-risk", minutesToBreach: Math.round(minutesLeft), minutesOver: null };
+    return { status: "breach-risk", minutesToBreach: Math.round(minutesLeft), minutesOver: null, responseMinutes: null };
   }
   if (minutesLeft <= WARNING_MINUTES) {
-    return { status: "warning", minutesToBreach: Math.round(minutesLeft), minutesOver: null };
+    return { status: "warning", minutesToBreach: Math.round(minutesLeft), minutesOver: null, responseMinutes: null };
   }
-  return { status: "safe", minutesToBreach: Math.round(minutesLeft), minutesOver: null };
+  return { status: "safe", minutesToBreach: Math.round(minutesLeft), minutesOver: null, responseMinutes: null };
 }
 
 export async function getLeadSlaStatus(leadId: string, tenantId: string): Promise<LeadSlaStatus | null> {
@@ -77,7 +82,7 @@ export async function getLeadSlaStatus(leadId: string, tenantId: string): Promis
   if (!lead) return null;
 
   const firstResponseAt = await replyDraftRepository.getEarliestSentAtForLead(leadId, tenantId);
-  const { status, minutesToBreach, minutesOver } = computeSlaStatus(
+  const { status, minutesToBreach, minutesOver, responseMinutes } = computeSlaStatus(
     lead.createdAt,
     firstResponseAt,
     lead.priority
@@ -88,6 +93,7 @@ export async function getLeadSlaStatus(leadId: string, tenantId: string): Promis
     minutes_to_breach: minutesToBreach,
     minutes_over: minutesOver,
     first_response_at: firstResponseAt?.toISOString() ?? null,
+    response_minutes: responseMinutes,
   };
 }
 
@@ -156,7 +162,7 @@ export async function getLeadsWithSlaStatus(
 
   for (const lead of leads) {
     const firstResponseAt = firstResponseByLead.get(lead.id) ?? null;
-    const { status, minutesToBreach, minutesOver } = computeSlaStatus(
+    const { status, minutesToBreach, minutesOver, responseMinutes } = computeSlaStatus(
       lead.createdAt,
       firstResponseAt,
       lead.priority
@@ -169,6 +175,7 @@ export async function getLeadsWithSlaStatus(
         minutes_to_breach: minutesToBreach,
         minutes_over: minutesOver,
         first_response_at: firstResponseAt?.toISOString() ?? null,
+        response_minutes: responseMinutes,
       },
     });
   }

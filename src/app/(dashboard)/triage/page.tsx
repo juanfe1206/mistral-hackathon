@@ -61,6 +61,17 @@ function filterLeads(leads: Lead[], filters: QueueFilterBarFilters): Lead[] {
   });
 }
 
+function buildLeadDetailHref(leadId: string, filters: QueueFilterBarFilters, sort: QueueSortOption): string {
+  const params = new URLSearchParams({
+    from: "triage",
+    sort,
+  });
+  if (filters.priority) params.set("priority", filters.priority);
+  if (filters.lifecycle) params.set("lifecycle", filters.lifecycle);
+  if (filters.source) params.set("source", filters.source);
+  return `/lead/${leadId}?${params.toString()}`;
+}
+
 export default function TriagePage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -249,6 +260,7 @@ export default function TriagePage() {
                 }}
                 variant={isMobile ? "compact" : "standard"}
                 state={lead.lifecycle_state === "at_risk" ? "critical-at-risk" : "default"}
+                detailHref={buildLeadDetailHref(lead.id, filters, sort)}
               />
             </Box>
           ))}
@@ -275,6 +287,7 @@ export default function TriagePage() {
                       created_at: lead.created_at,
                     }}
                     variant={isMobile ? "compact" : "standard"}
+                    detailHref={buildLeadDetailHref(lead.id, filters, sort)}
                   />
                 </Box>
               ))}

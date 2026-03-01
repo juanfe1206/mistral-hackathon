@@ -62,7 +62,7 @@ development_status:
   4-0-apply-design-system-foundation: done
   4-1-implement-phase-1-journey-components: done
   4-2-implement-phase-2-risk-recovery-components: done
-  4-3-implement-phase-3-governance-component: review
-  4-4-align-triage-and-at-risk-flows-to-spec: ready-for-dev
+  4-3-implement-phase-3-governance-component: done
+  4-4-align-triage-and-at-risk-flows-to-spec: review
   4-5-responsive-and-accessibility-validation: ready-for-dev
   epic-4-retrospective: optional

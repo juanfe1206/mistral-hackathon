@@ -1,6 +1,6 @@
 # Story 4.3: Implement Phase 3 Governance Component
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -157,6 +157,7 @@ GPT-5 Codex
 - 2026-03-01: Integrated governance timeline in lead detail page and normalized additive timeline fields (`event_label`, `actor`, `rationale`, `transition`, `source`, `flagged`) from API.
 - 2026-03-01: Extended timeline service to merge interaction and audit governance events (override/approval/send/lifecycle/reply-generated) without adding parallel endpoints.
 - 2026-03-01: Validation run: `pnpm test` passed (149 tests passed, 1 skipped). `pnpm lint` passed with pre-existing warnings unrelated to this story.
+- 2026-03-01: Code-review follow-up fixes applied for keyboard operability assertions (`Enter` + `Space`) in DecisionTimeline component test coverage and component handler.
 
 ### File List
 
@@ -175,3 +176,4 @@ GPT-5 Codex
 
 - 2026-03-01: Story created and set to `ready-for-dev`.
 - 2026-03-01: Implemented DecisionTimeline governance UI, merged audit + interaction timeline events, added tests, and moved story to `review`.
+- 2026-03-01: Code review rerun after 4.3 fixes; no remaining High/Medium findings. Story moved to `done`.

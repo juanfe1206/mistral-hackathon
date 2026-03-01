@@ -8,10 +8,12 @@ const TENANT_ID = "22222222-2222-2222-8222-222222222222";
 const mockFindLeadById = vi.fn();
 const mockGetOrCreateDefaultTenant = vi.fn();
 const mockDetectAndFlagAtRisk = vi.fn();
+const mockClassifyAndPersistForLead = vi.fn();
 
 vi.mock("@/server/services/lead-service", () => ({
   findLeadById: (...args: unknown[]) => mockFindLeadById(...args),
   getOrCreateDefaultTenant: () => mockGetOrCreateDefaultTenant(),
+  classifyAndPersistForLead: (...args: unknown[]) => mockClassifyAndPersistForLead(...args),
 }));
 
 vi.mock("@/server/services/risk-service", () => ({
@@ -28,7 +30,8 @@ describe("GET /api/leads/[id]", () => {
     vi.clearAllMocks();
     mockGetOrCreateDefaultTenant.mockResolvedValue(TENANT_ID);
     mockDetectAndFlagAtRisk.mockResolvedValue({ flagged: false });
-    mockGetLeadSlaStatus.mockResolvedValue({ status: "safe", minutes_to_breach: null, minutes_over: null, first_response_at: null });
+    mockClassifyAndPersistForLead.mockResolvedValue(undefined);
+    mockGetLeadSlaStatus.mockResolvedValue({ status: "safe", minutes_to_breach: null, minutes_over: null, first_response_at: null, response_minutes: null });
   });
 
   it("returns lead with override_history when overrides exist", async () => {
@@ -67,7 +70,7 @@ describe("GET /api/leads/[id]", () => {
     expect(json.data.override_history[0].created_at).toBe(
       "2024-01-02T12:00:00.000Z"
     );
-    expect(json.data.sla_status).toEqual({ status: "safe", minutes_to_breach: null, minutes_over: null, first_response_at: null });
+    expect(json.data.sla_status).toEqual({ status: "safe", minutes_to_breach: null, minutes_over: null, first_response_at: null, response_minutes: null });
   });
 
   it("returns empty override_history when no overrides", async () => {
@@ -107,14 +110,14 @@ describe("GET /api/leads/[id]", () => {
       priorityOverrides: [],
       riskPulses: [],
     });
-    mockGetLeadSlaStatus.mockResolvedValue({ status: "breached", minutes_to_breach: null, minutes_over: 2, first_response_at: null });
+    mockGetLeadSlaStatus.mockResolvedValue({ status: "breached", minutes_to_breach: null, minutes_over: 2, first_response_at: null, response_minutes: null });
     const request = new NextRequest(`http://localhost/api/leads/${LEAD_ID}`);
     const response = await GET(request, {
       params: Promise.resolve({ id: LEAD_ID }),
     });
     expect(response.status).toBe(200);
     const json = await response.json();
-    expect(json.data.sla_status).toEqual({ status: "breached", minutes_to_breach: null, minutes_over: 2, first_response_at: null });
+    expect(json.data.sla_status).toEqual({ status: "breached", minutes_to_breach: null, minutes_over: 2, first_response_at: null, response_minutes: null });
   });
 
   it("returns 404 when lead not found", async () => {

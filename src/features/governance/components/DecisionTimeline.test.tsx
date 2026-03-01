@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "@/styles/theme";
@@ -39,7 +39,27 @@ const BASE_ITEMS: DecisionTimelineItem[] = [
 ];
 
 describe("DecisionTimeline", () => {
-  afterEach(() => cleanup());
+  beforeEach(() => {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      () =>
+        ({
+          x: 10,
+          y: 10,
+          width: 120,
+          height: 36,
+          top: 10,
+          left: 10,
+          right: 130,
+          bottom: 46,
+          toJSON: () => ({}),
+        }) as DOMRect
+    );
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+  });
 
   it("renders semantic list output with compact variant and non-color status cue", () => {
     render(
@@ -69,17 +89,24 @@ describe("DecisionTimeline", () => {
     expect(screen.getByText(/State transition unavailable/i)).toBeInTheDocument();
   });
 
-  it("supports keyboard expansion with Space key", () => {
+  it("supports keyboard expansion with Enter and Space keys", () => {
     render(
       <TestWrapper>
         <DecisionTimeline items={BASE_ITEMS} />
       </TestWrapper>
     );
 
-    const expandButton = screen.getAllByRole("button", { name: /Expand details/i })[0];
-    expect(expandButton).toHaveAttribute("aria-expanded", "false");
-    fireEvent.keyDown(expandButton, { key: " ", code: "Space" });
-    expect(expandButton).toHaveAttribute("aria-expanded", "true");
+    const [firstExpandButton, secondExpandButton] = screen.getAllByRole("button", {
+      name: /Expand details/i,
+    });
+
+    expect(firstExpandButton).toHaveAttribute("aria-expanded", "false");
+    fireEvent.keyDown(firstExpandButton, { key: "Enter", code: "Enter" });
+    expect(firstExpandButton).toHaveAttribute("aria-expanded", "true");
+
+    expect(secondExpandButton).toHaveAttribute("aria-expanded", "false");
+    fireEvent.keyDown(secondExpandButton, { key: " ", code: "Space" });
+    expect(secondExpandButton).toHaveAttribute("aria-expanded", "true");
   });
 
   it("filters events by event type and toggles audit variant", () => {

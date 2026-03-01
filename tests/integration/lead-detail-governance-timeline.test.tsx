@@ -7,6 +7,7 @@ import LeadDetailPage from "@/app/(dashboard)/lead/[id]/page";
 
 vi.mock("next/navigation", () => ({
   useParams: () => ({ id: "11111111-1111-1111-8111-111111111111" }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 const leadResponse = {
@@ -60,6 +61,21 @@ const timelineResponse = {
 
 describe("lead detail governance timeline integration", () => {
   beforeEach(() => {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      () =>
+        ({
+          x: 10,
+          y: 10,
+          width: 120,
+          height: 36,
+          top: 10,
+          left: 10,
+          right: 130,
+          bottom: 46,
+          toJSON: () => ({}),
+        }) as DOMRect
+    );
+
     vi.spyOn(global, "fetch").mockImplementation((input: URL | RequestInfo) => {
       const url = String(input);
       if (url.includes("/api/leads/11111111-1111-1111-8111-111111111111/timeline")) {

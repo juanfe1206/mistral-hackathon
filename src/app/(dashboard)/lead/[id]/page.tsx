@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { LeadSlaIndicator, type SlaStatusData } from "@/components/SLASafetyIndicator";
 import { AtRiskPulseBanner } from "@/features/risk-pulse/components/AtRiskPulseBanner";
 import { ConciergeReplyComposer, type ComposerTone, type ComposerStatus } from "@/features/reply-composer/components/ConciergeReplyComposer";
@@ -43,6 +43,7 @@ interface Lead {
 
 export default function LeadDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const id = params.id as string;
   const [lead, setLead] = useState<Lead | null>(null);
   const [timeline, setTimeline] = useState<DecisionTimelineItem[]>([]);
@@ -284,6 +285,23 @@ export default function LeadDetailPage() {
   };
 
   const PRIORITIES: Priority[] = ["vip", "high", "low"];
+  const from = searchParams.get("from");
+  const backToTriageParams = new URLSearchParams();
+  const triageSort = searchParams.get("sort");
+  const triagePriority = searchParams.get("priority");
+  const triageLifecycle = searchParams.get("lifecycle");
+  const triageSource = searchParams.get("source");
+  if (triageSort) backToTriageParams.set("sort", triageSort);
+  if (triagePriority) backToTriageParams.set("priority", triagePriority);
+  if (triageLifecycle) backToTriageParams.set("lifecycle", triageLifecycle);
+  if (triageSource) backToTriageParams.set("source", triageSource);
+  const backHref =
+    from === "at-risk"
+      ? "/at-risk"
+      : backToTriageParams.toString().length > 0
+        ? `/triage?${backToTriageParams.toString()}`
+        : "/triage";
+  const backLabel = from === "at-risk" ? "Back to at-risk" : "Back to triage";
 
   if (loading) {
     return (
@@ -297,8 +315,8 @@ export default function LeadDetailPage() {
     return (
       <div style={{ padding: "1.5rem", maxWidth: 960, margin: "0 auto" }}>
         <p style={{ color: "crimson" }}>{error ?? "Lead not found."}</p>
-        <Link href="/triage" style={{ color: "var(--foreground)" }}>
-          ← Back to triage
+        <Link href={backHref} style={{ color: "var(--foreground)" }}>
+          ← {backLabel}
         </Link>
       </div>
     );
@@ -355,13 +373,13 @@ export default function LeadDetailPage() {
       )}
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>
         <Link
-          href="/triage"
+          href={backHref}
           style={{
             color: "var(--foreground)",
             textDecoration: "none",
           }}
         >
-          ← Back to triage
+          ← {backLabel}
         </Link>
         <button
           type="button"

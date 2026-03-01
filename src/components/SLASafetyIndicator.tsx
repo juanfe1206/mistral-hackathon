@@ -2,6 +2,7 @@
 
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
+import SvgIcon, { type SvgIconProps } from "@mui/material/SvgIcon";
 
 export type SlaStatus = "safe" | "warning" | "breach-risk" | "breached" | "recovering" | "n_a";
 
@@ -12,6 +13,7 @@ export interface SlaStatusData {
   minutes_to_breach: number | null;
   minutes_over: number | null;
   first_response_at: string | null;
+  response_minutes?: number | null;
   /** Optional: trend for status change; when available, show arrow (↑/↓/−) per UX spec */
   trend?: SlaTrend;
 }
@@ -54,27 +56,67 @@ function getTrendSymbol(trend?: SlaTrend): string {
   return "−";
 }
 
+function StatusIcon({
+  kind,
+  color,
+  ...props
+}: { kind: "safe" | "warning" | "breached" | "recovering" | "n_a"; color: string } & Omit<SvgIconProps, "color">) {
+  switch (kind) {
+    case "safe":
+      return (
+        <SvgIcon {...props} htmlColor={color} viewBox="0 0 24 24">
+          <path d="M9.6 16.6L5.8 12.8L4.4 14.2L9.6 19.4L20 9L18.6 7.6Z" />
+        </SvgIcon>
+      );
+    case "warning":
+      return (
+        <SvgIcon {...props} htmlColor={color} viewBox="0 0 24 24">
+          <path d="M1 21H23L12 2ZM13 18H11V20H13ZM13 10H11V16H13Z" />
+        </SvgIcon>
+      );
+    case "breached":
+      return (
+        <SvgIcon {...props} htmlColor={color} viewBox="0 0 24 24">
+          <path d="M18.3 5.71L12 12.01L5.7 5.71L4.29 7.12L10.59 13.42L4.29 19.72L5.7 21.13L12 14.83L18.3 21.13L19.71 19.72L13.41 13.42L19.71 7.12Z" />
+        </SvgIcon>
+      );
+    case "recovering":
+      return (
+        <SvgIcon {...props} htmlColor={color} viewBox="0 0 24 24">
+          <path d="M17.65 6.35A7.95 7.95 0 0 0 12 4V1L7 6L12 11V7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17C9.79 17 7.92 15.56 7.26 13.57L5.36 14.2C6.29 17.01 8.92 19 12 19C15.87 19 19 15.87 19 12C19 9.79 17.92 7.84 16.25 6.58Z" />
+        </SvgIcon>
+      );
+    default:
+      return (
+        <SvgIcon {...props} htmlColor={color} viewBox="0 0 24 24">
+          <path d="M6 11H18V13H6Z" />
+        </SvgIcon>
+      );
+  }
+}
+
 function getStatusConfig(status: SlaStatus, palette: { success: { main: string }; warning: { main: string }; error: { main: string }; grey: { [k: number]: string } }) {
   switch (status) {
     case "safe":
-      return { icon: "✓", label: "SLA safe", color: palette.success.main, ariaLabel: "SLA safe" };
+      return { icon: "safe" as const, label: "SLA safe", color: palette.success.main, ariaLabel: "SLA safe" };
     case "warning":
-      return { icon: "!", label: "Approaching breach", color: palette.warning.main, ariaLabel: "SLA warning" };
+      return { icon: "warning" as const, label: "Approaching breach", color: palette.warning.main, ariaLabel: "SLA warning" };
     case "breach-risk":
-      return { icon: "!", label: "Breach risk", color: palette.warning.main, ariaLabel: "SLA at breach risk" };
+      return { icon: "warning" as const, label: "Breach risk", color: palette.warning.main, ariaLabel: "SLA at breach risk" };
     case "breached":
-      return { icon: "✕", label: "Breached", color: palette.error.main, ariaLabel: "SLA breached" };
+      return { icon: "breached" as const, label: "Breached", color: palette.error.main, ariaLabel: "SLA breached" };
     case "recovering":
-      return { icon: "↻", label: "Recovered late", color: palette.grey[600] ?? "#757575", ariaLabel: "Responded after SLA breach" };
+      return { icon: "recovering" as const, label: "Recovered late", color: palette.grey[600] ?? "#757575", ariaLabel: "Responded after SLA breach" };
     default:
-      return { icon: "−", label: "N/A", color: palette.grey[500] ?? "#9e9e9e", ariaLabel: "SLA not applicable" };
+      return { icon: "n_a" as const, label: "N/A", color: palette.grey[500] ?? "#9e9e9e", ariaLabel: "SLA not applicable" };
   }
 }
 
 function getActionableLabel(sla: SlaStatusData): string {
   if (sla.status === "n_a") return "-";
   if (sla.status === "safe" && sla.minutes_to_breach != null) return `${sla.minutes_to_breach}m to breach`;
-  if (sla.status === "safe" && sla.first_response_at) return "Responded in time";
+  if (sla.status === "safe" && sla.response_minutes != null) return `Responded in ${sla.response_minutes}m`;
+  if (sla.status === "safe" && sla.first_response_at) return "Responded";
   if (sla.status === "warning" && sla.minutes_to_breach != null) return `${sla.minutes_to_breach}m to breach`;
   if (sla.status === "breach-risk" && sla.minutes_to_breach != null) return `${sla.minutes_to_breach}m to breach`;
   if (sla.status === "breached" && sla.minutes_over != null) return `Breached ${sla.minutes_over}m ago`;
@@ -141,7 +183,7 @@ export function LeadSlaIndicator({ slaStatus, compact, variant = "inline", unava
         border: variant === "summary" ? `2px solid ${cfg.color}40` : "none",
       }}
     >
-      <span aria-hidden="true">{cfg.icon}</span>
+      <StatusIcon kind={cfg.icon} color={cfg.color} fontSize="inherit" aria-hidden="true" />
       {trendSym && <span aria-hidden="true">{trendSym}</span>}
       {label}
     </Box>
@@ -184,22 +226,22 @@ export function QueueSlaIndicator({ summary, unavailable = false, onRetry, onAtR
   const { count_breached, count_breach_risk, count_warning, sla_safe_percent, total_tracked } = summary;
   const atRisk = count_breached + count_breach_risk + count_warning;
   let label: string;
-  let icon: string;
+  let icon: "safe" | "warning" | "n_a";
   let color: string;
   let ariaLabel: string;
   if (total_tracked === 0) {
     label = "No SLA leads";
-    icon = "−";
+    icon = "n_a";
     color = palette.grey?.[500] ?? "#9e9e9e";
     ariaLabel = "No VIP or high-priority leads to track";
   } else if (atRisk === 0) {
     label = sla_safe_percent != null ? `SLA Safe ${sla_safe_percent}%` : "SLA Safe";
-    icon = "✓";
+    icon = "safe";
     color = palette.success.main;
     ariaLabel = label;
   } else {
     label = `${atRisk} at risk`;
-    icon = "!";
+    icon = "warning";
     color = palette.warning.main;
     ariaLabel = `${atRisk} leads at SLA risk`;
   }
@@ -239,7 +281,7 @@ export function QueueSlaIndicator({ summary, unavailable = false, onRetry, onAtR
           minHeight: 44,
         }}
       >
-        <span aria-hidden="true">{icon}</span>
+        <StatusIcon kind={icon} color={color} fontSize="inherit" aria-hidden="true" />
         {label}
       </Box>
     );
@@ -252,7 +294,7 @@ export function QueueSlaIndicator({ summary, unavailable = false, onRetry, onAtR
       aria-label={ariaLabel}
       sx={baseSx}
     >
-      <span aria-hidden="true">{icon}</span>
+      <StatusIcon kind={icon} color={color} fontSize="inherit" aria-hidden="true" />
       {label}
     </Box>
   );
