@@ -88,3 +88,23 @@ export async function findLeadsByTenant(tenantId: string, options?: { limit?: nu
     include: latestClassificationInclude,
   });
 }
+
+/** Count leads by lifecycle state for tenant (e.g. recovered count for KPI). */
+export async function countLeadsByLifecycleState(
+  tenantId: string,
+  lifecycleState: "default" | "at_risk" | "recovered" | "lost"
+) {
+  return prisma.lead.count({
+    where: { tenantId, lifecycleState },
+  });
+}
+
+/** Find VIP and high-priority leads for queue aging (oldest first). */
+export async function findVipHighLeadsByTenant(tenantId: string, options?: { limit?: number }) {
+  return prisma.lead.findMany({
+    where: { tenantId, priority: { in: ["vip", "high"] } },
+    orderBy: { createdAt: "asc" },
+    take: options?.limit ?? 500,
+    select: { id: true, createdAt: true },
+  });
+}
