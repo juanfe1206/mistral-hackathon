@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Tenant: 'Tenant',
   Lead: 'Lead',
+  Interaction: 'Interaction',
   IngestionFailure: 'IngestionFailure'
 } as const
 
@@ -87,10 +88,24 @@ export const LeadScalarFieldEnum = {
   sourceChannel: 'sourceChannel',
   sourceExternalId: 'sourceExternalId',
   sourceMetadata: 'sourceMetadata',
+  priority: 'priority',
   createdAt: 'createdAt'
 } as const
 
 export type LeadScalarFieldEnum = (typeof LeadScalarFieldEnum)[keyof typeof LeadScalarFieldEnum]
+
+
+export const InteractionScalarFieldEnum = {
+  id: 'id',
+  leadId: 'leadId',
+  tenantId: 'tenantId',
+  eventType: 'eventType',
+  occurredAt: 'occurredAt',
+  payload: 'payload',
+  createdAt: 'createdAt'
+} as const
+
+export type InteractionScalarFieldEnum = (typeof InteractionScalarFieldEnum)[keyof typeof InteractionScalarFieldEnum]
 
 
 export const IngestionFailureScalarFieldEnum = {

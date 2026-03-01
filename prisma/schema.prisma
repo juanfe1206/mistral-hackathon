@@ -19,18 +19,43 @@ model Tenant {
   @@map("tenants")
 }
 
-model Lead {
-  id               String   @id @default(uuid()) @db.Uuid
-  tenantId         String   @map("tenant_id") @db.Uuid
-  sourceChannel    String   @map("source_channel")
-  sourceExternalId String   @map("source_external_id")
-  sourceMetadata   Json     @map("source_metadata")
-  createdAt        DateTime @default(now()) @map("created_at")
+enum LeadPriority {
+  vip
+  high
+  low
+}
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+model Lead {
+  id               String       @id @default(uuid()) @db.Uuid
+  tenantId         String       @map("tenant_id") @db.Uuid
+  sourceChannel    String       @map("source_channel")
+  sourceExternalId String       @map("source_external_id")
+  sourceMetadata   Json         @map("source_metadata")
+  priority         LeadPriority @default(low)
+  createdAt        DateTime     @default(now()) @map("created_at")
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  interactions Interaction[]
 
   @@index([tenantId], name: "idx_leads_tenant_id")
+  @@index([tenantId, priority], name: "idx_leads_tenant_id_priority")
   @@map("leads")
+}
+
+model Interaction {
+  id         String   @id @default(uuid()) @db.Uuid
+  leadId     String   @map("lead_id") @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  eventType  String   @map("event_type")
+  occurredAt DateTime @map("occurred_at")
+  payload    Json     @map("payload")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId], name: "idx_interactions_lead_id")
+  @@index([tenantId], name: "idx_interactions_tenant_id")
+  @@map("interactions")
 }
 
 model IngestionFailure {

@@ -143,6 +143,13 @@ export type JsonFilterBase<$PrismaModel = never> = {
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
 }
 
+export type EnumLeadPriorityFilter<$PrismaModel = never> = {
+  equals?: $Enums.LeadPriority | Prisma.EnumLeadPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.LeadPriority[] | Prisma.ListEnumLeadPriorityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LeadPriority[] | Prisma.ListEnumLeadPriorityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLeadPriorityFilter<$PrismaModel> | $Enums.LeadPriority
+}
+
 export type StringWithAggregatesFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -186,6 +193,16 @@ export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedJsonFilter<$PrismaModel>
   _max?: Prisma.NestedJsonFilter<$PrismaModel>
+}
+
+export type EnumLeadPriorityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LeadPriority | Prisma.EnumLeadPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.LeadPriority[] | Prisma.ListEnumLeadPriorityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LeadPriority[] | Prisma.ListEnumLeadPriorityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLeadPriorityWithAggregatesFilter<$PrismaModel> | $Enums.LeadPriority
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLeadPriorityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLeadPriorityFilter<$PrismaModel>
 }
 
 export type JsonNullableFilter<$PrismaModel = never> =
@@ -356,6 +373,13 @@ export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedDateTimeFilter<$PrismaModel>
 }
 
+export type NestedEnumLeadPriorityFilter<$PrismaModel = never> = {
+  equals?: $Enums.LeadPriority | Prisma.EnumLeadPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.LeadPriority[] | Prisma.ListEnumLeadPriorityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LeadPriority[] | Prisma.ListEnumLeadPriorityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLeadPriorityFilter<$PrismaModel> | $Enums.LeadPriority
+}
+
 export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -395,6 +419,16 @@ export type NestedJsonFilterBase<$PrismaModel = never> = {
   gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
+}
+
+export type NestedEnumLeadPriorityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LeadPriority | Prisma.EnumLeadPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.LeadPriority[] | Prisma.ListEnumLeadPriorityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LeadPriority[] | Prisma.ListEnumLeadPriorityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLeadPriorityWithAggregatesFilter<$PrismaModel> | $Enums.LeadPriority
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLeadPriorityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLeadPriorityFilter<$PrismaModel>
 }
 
 export type NestedJsonNullableFilter<$PrismaModel = never> =

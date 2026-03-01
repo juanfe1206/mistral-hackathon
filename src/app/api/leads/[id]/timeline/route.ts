@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { createErrorResponse, createSuccessResponse } from "@/server/api/error-envelope";
 import { isValidUuid } from "@/lib/uuid";
 import * as leadService from "@/server/services/lead-service";
+
+const QuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(500).optional().default(100),
+  offset: z.coerce.number().int().min(0).optional().default(0),
+});
 
 export async function GET(
   request: NextRequest,
@@ -36,17 +42,38 @@ export async function GET(
       );
     }
 
+    const queryResult = QuerySchema.safeParse(
+      Object.fromEntries(request.nextUrl.searchParams.entries())
+    );
+    if (!queryResult.success) {
+      return NextResponse.json(
+        createErrorResponse(
+          "VALIDATION_FAILED",
+          "Invalid query parameters",
+          queryResult.error.flatten().fieldErrors as unknown[],
+          requestId
+        ),
+        { status: 400 }
+      );
+    }
+    const query = queryResult.data;
+
+    const interactions = await leadService.getTimelineForLead(id, tenantId, {
+      limit: query.limit,
+      offset: query.offset,
+    });
+
     return NextResponse.json(
       createSuccessResponse(
-        {
-          id: lead.id,
-          tenant_id: lead.tenantId,
-          source_channel: lead.sourceChannel,
-          source_external_id: lead.sourceExternalId,
-          source_metadata: lead.sourceMetadata,
-          priority: lead.priority,
-          created_at: lead.createdAt.toISOString(),
-        },
+        interactions.map((i) => ({
+          id: i.id,
+          lead_id: i.leadId,
+          tenant_id: i.tenantId,
+          event_type: i.eventType,
+          occurred_at: i.occurredAt.toISOString(),
+          payload: i.payload,
+          created_at: i.createdAt.toISOString(),
+        })),
         requestId
       )
     );
@@ -54,7 +81,7 @@ export async function GET(
     return NextResponse.json(
       createErrorResponse(
         "FETCH_FAILED",
-        "Failed to fetch lead",
+        "Failed to fetch timeline",
         [err instanceof Error ? err.message : String(err)],
         requestId
       ),

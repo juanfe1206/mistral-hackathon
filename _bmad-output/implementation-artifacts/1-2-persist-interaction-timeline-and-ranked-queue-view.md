@@ -1,6 +1,6 @@
 # Story 1.2: Persist Interaction Timeline and Ranked Queue View
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -24,24 +24,24 @@ so that I can understand context and focus first on the most urgent leads.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add Prisma schema for interactions and lead priority (AC: #1, #2)
-  - [ ] Define `interactions` table: id, lead_id, tenant_id, event_type, occurred_at, payload (JSON), created_at
-  - [ ] Add `priority` enum/column to `leads` (vip, high, low) with default 'low'
-  - [ ] Run `prisma migrate dev`
-- [ ] Task 2: Create interaction on lead ingestion (AC: #1)
-  - [ ] Update WhatsApp webhook to create first interaction when creating lead (event_type: 'ingested', timestamp from message)
-  - [ ] Backfill existing leads: create interaction from source_metadata if present
-- [ ] Task 3: Implement timeline API and repository (AC: #1)
-  - [ ] Create `src/server/repositories/interaction-repository.ts` with tenant-scoped queries
-  - [ ] Create `src/app/api/leads/[id]/timeline/route.ts` (GET returns interactions ordered by occurred_at)
-  - [ ] Lead service/repository: add getTimelineForLead, createInteraction
-- [ ] Task 4: Implement ranked queue API (AC: #2)
-  - [ ] Update `GET /api/leads` to sort by priority (vip > high > low), then created_at desc
-  - [ ] Ensure deterministic ordering; include priority in response
-- [ ] Task 5: Update triage and lead detail views (AC: #1, #2)
-  - [ ] Triage page: display leads in API order (already fetched); show priority indicator
-  - [ ] Lead detail: add timeline section showing interactions with timestamps
-  - [ ] NFR1: Ensure page loads and refreshes reflect updates within 2s (server response + client render)
+- [x] Task 1: Add Prisma schema for interactions and lead priority (AC: #1, #2)
+  - [x] Define `interactions` table: id, lead_id, tenant_id, event_type, occurred_at, payload (JSON), created_at
+  - [x] Add `priority` enum/column to `leads` (vip, high, low) with default 'low'
+  - [x] Run `prisma migrate dev`
+- [x] Task 2: Create interaction on lead ingestion (AC: #1)
+  - [x] Update WhatsApp webhook to create first interaction when creating lead (event_type: 'ingested', timestamp from message)
+  - [x] Backfill existing leads: create interaction from source_metadata if present
+- [x] Task 3: Implement timeline API and repository (AC: #1)
+  - [x] Create `src/server/repositories/interaction-repository.ts` with tenant-scoped queries
+  - [x] Create `src/app/api/leads/[id]/timeline/route.ts` (GET returns interactions ordered by occurred_at)
+  - [x] Lead service/repository: add getTimelineForLead, createInteraction
+- [x] Task 4: Implement ranked queue API (AC: #2)
+  - [x] Update `GET /api/leads` to sort by priority (vip > high > low), then created_at desc
+  - [x] Ensure deterministic ordering; include priority in response
+- [x] Task 5: Update triage and lead detail views (AC: #1, #2)
+  - [x] Triage page: display leads in API order (already fetched); show priority indicator
+  - [x] Lead detail: add timeline section showing interactions with timestamps
+  - [x] NFR1: Ensure page loads and refreshes reflect updates within 2s (server response + client render)
 
 ## Dev Notes
 
@@ -175,6 +175,8 @@ No `project-context.md` found. Use PRD, architecture, epics, and UX spec. UX spe
 ## Change Log
 
 - 2026-03-01: Story created via create-story workflow. Target: interaction timeline persistence + ranked queue.
+- 2026-03-01: Implementation complete. Added Prisma schema (interactions, LeadPriority), migration, webhook interaction creation, timeline API, ranked queue, triage/lead detail UI updates, backfill script, tests.
+- 2026-03-01: Code review (AI). Fixed: lead+interaction atomic transaction, timeline 400 on invalid query params, refresh buttons on triage/lead pages, tenantId naming, repository ordering tests.
 
 ---
 
@@ -182,10 +184,41 @@ No `project-context.md` found. Use PRD, architecture, epics, and UX spec. UX spe
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+Composer (dev-story workflow)
 
 ### Debug Log References
 
 ### Completion Notes List
 
+- Prisma schema: LeadPriority enum (vip, high, low), Interaction model with indexes. Migration applied.
+- Webhook: Creates initial 'ingested' interaction with occurred_at from WhatsApp message timestamp when creating lead.
+- Backfill script `pnpm backfill:interactions` for existing leads without interactions.
+- Timeline API: GET /api/leads/[id]/timeline returns interactions ordered by occurred_at ASC.
+- Queue API: GET /api/leads sorts by priority (vip > high > low), then created_at DESC. Includes priority in response.
+- Triage: Priority badge per lead. Lead detail: timeline section with interactions.
+- Tests: WhatsApp webhook initialInteractionOccurredAt, timeline API, queue API.
+- [Code review fix] createLead + interaction creation wrapped in prisma.$transaction for atomicity.
+- [Code review fix] Timeline API returns 400 with VALIDATION_FAILED for invalid limit/offset query params.
+- [Code review fix] Refresh buttons on triage and lead detail pages for NFR1.
+- [Code review fix] Repository ordering tests (lead-repository, interaction-repository) verify sort behavior.
+
 ### File List
+
+- prisma/schema.prisma (modified)
+- prisma/migrations/20260301000824_add_interactions_and_lead_priority/ (new)
+- src/server/repositories/interaction-repository.ts (new)
+- src/server/repositories/lead-repository.ts (modified)
+- src/server/services/lead-service.ts (modified)
+- src/app/api/webhooks/whatsapp/route.ts (modified)
+- src/app/api/leads/route.ts (modified)
+- src/app/api/leads/[id]/route.ts (modified)
+- src/app/api/leads/[id]/timeline/route.ts (new)
+- src/app/(dashboard)/triage/page.tsx (modified)
+- src/app/(dashboard)/lead/[id]/page.tsx (modified)
+- scripts/backfill-interactions.ts (new)
+- package.json (modified)
+- tests/webhooks/whatsapp.test.ts (modified)
+- tests/api/leads-timeline.test.ts (new)
+- tests/api/leads-queue.test.ts (new)
+- tests/repositories/lead-repository.test.ts (new)
+- tests/repositories/interaction-repository.test.ts (new)

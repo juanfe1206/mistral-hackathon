@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
           source_channel: l.sourceChannel,
           source_external_id: l.sourceExternalId,
           source_metadata: l.sourceMetadata,
+          priority: l.priority,
           created_at: l.createdAt.toISOString(),
         })),
         requestId

@@ -175,6 +175,7 @@ describe("WhatsApp webhook", () => {
             phone_number_id: "pn123",
             display_phone_number: "15559876543",
           }),
+          initialInteractionOccurredAt: new Date(1709308800 * 1000),
         })
       );
     });

@@ -52,6 +52,11 @@ export type Tenant = Prisma.TenantModel
  */
 export type Lead = Prisma.LeadModel
 /**
+ * Model Interaction
+ * 
+ */
+export type Interaction = Prisma.InteractionModel
+/**
  * Model IngestionFailure
  * 
  */

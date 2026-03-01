@@ -27,7 +27,7 @@ export async function findLeadById(id: string, tenantId: string) {
 export async function findLeadsByTenant(tenantId: string, options?: { limit?: number }) {
   return prisma.lead.findMany({
     where: { tenantId },
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ priority: "asc" }, { createdAt: "desc" }],
     take: options?.limit ?? 100,
   });
 }

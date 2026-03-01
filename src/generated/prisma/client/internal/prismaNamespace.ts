@@ -386,6 +386,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Tenant: 'Tenant',
   Lead: 'Lead',
+  Interaction: 'Interaction',
   IngestionFailure: 'IngestionFailure'
 } as const
 
@@ -402,7 +403,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "lead" | "ingestionFailure"
+    modelProps: "tenant" | "lead" | "interaction" | "ingestionFailure"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -554,6 +555,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Interaction: {
+      payload: Prisma.$InteractionPayload<ExtArgs>
+      fields: Prisma.InteractionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InteractionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InteractionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InteractionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InteractionPayload>
+        }
+        findFirst: {
+          args: Prisma.InteractionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InteractionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InteractionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InteractionPayload>
+        }
+        findMany: {
+          args: Prisma.InteractionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InteractionPayload>[]
+        }
+        create: {
+          args: Prisma.InteractionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InteractionPayload>
+        }
+        createMany: {
+          args: Prisma.InteractionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InteractionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InteractionPayload>[]
+        }
+        delete: {
+          args: Prisma.InteractionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InteractionPayload>
+        }
+        update: {
+          args: Prisma.InteractionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InteractionPayload>
+        }
+        deleteMany: {
+          args: Prisma.InteractionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InteractionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InteractionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InteractionPayload>[]
+        }
+        upsert: {
+          args: Prisma.InteractionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InteractionPayload>
+        }
+        aggregate: {
+          args: Prisma.InteractionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInteraction>
+        }
+        groupBy: {
+          args: Prisma.InteractionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InteractionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InteractionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InteractionCountAggregateOutputType> | number
+        }
+      }
+    }
     IngestionFailure: {
       payload: Prisma.$IngestionFailurePayload<ExtArgs>
       fields: Prisma.IngestionFailureFieldRefs
@@ -682,10 +757,24 @@ export const LeadScalarFieldEnum = {
   sourceChannel: 'sourceChannel',
   sourceExternalId: 'sourceExternalId',
   sourceMetadata: 'sourceMetadata',
+  priority: 'priority',
   createdAt: 'createdAt'
 } as const
 
 export type LeadScalarFieldEnum = (typeof LeadScalarFieldEnum)[keyof typeof LeadScalarFieldEnum]
+
+
+export const InteractionScalarFieldEnum = {
+  id: 'id',
+  leadId: 'leadId',
+  tenantId: 'tenantId',
+  eventType: 'eventType',
+  occurredAt: 'occurredAt',
+  payload: 'payload',
+  createdAt: 'createdAt'
+} as const
+
+export type InteractionScalarFieldEnum = (typeof InteractionScalarFieldEnum)[keyof typeof InteractionScalarFieldEnum]
 
 
 export const IngestionFailureScalarFieldEnum = {
@@ -792,6 +881,20 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'LeadPriority'
+ */
+export type EnumLeadPriorityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LeadPriority'>
+    
+
+
+/**
+ * Reference to a field of type 'LeadPriority[]'
+ */
+export type ListEnumLeadPriorityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LeadPriority[]'>
     
 
 
@@ -905,6 +1008,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   tenant?: Prisma.TenantOmit
   lead?: Prisma.LeadOmit
+  interaction?: Prisma.InteractionOmit
   ingestionFailure?: Prisma.IngestionFailureOmit
 }
 

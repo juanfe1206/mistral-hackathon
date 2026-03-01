@@ -29,6 +29,7 @@ export type LeadMinAggregateOutputType = {
   tenantId: string | null
   sourceChannel: string | null
   sourceExternalId: string | null
+  priority: $Enums.LeadPriority | null
   createdAt: Date | null
 }
 
@@ -37,6 +38,7 @@ export type LeadMaxAggregateOutputType = {
   tenantId: string | null
   sourceChannel: string | null
   sourceExternalId: string | null
+  priority: $Enums.LeadPriority | null
   createdAt: Date | null
 }
 
@@ -46,6 +48,7 @@ export type LeadCountAggregateOutputType = {
   sourceChannel: number
   sourceExternalId: number
   sourceMetadata: number
+  priority: number
   createdAt: number
   _all: number
 }
@@ -56,6 +59,7 @@ export type LeadMinAggregateInputType = {
   tenantId?: true
   sourceChannel?: true
   sourceExternalId?: true
+  priority?: true
   createdAt?: true
 }
 
@@ -64,6 +68,7 @@ export type LeadMaxAggregateInputType = {
   tenantId?: true
   sourceChannel?: true
   sourceExternalId?: true
+  priority?: true
   createdAt?: true
 }
 
@@ -73,6 +78,7 @@ export type LeadCountAggregateInputType = {
   sourceChannel?: true
   sourceExternalId?: true
   sourceMetadata?: true
+  priority?: true
   createdAt?: true
   _all?: true
 }
@@ -155,6 +161,7 @@ export type LeadGroupByOutputType = {
   sourceChannel: string
   sourceExternalId: string
   sourceMetadata: runtime.JsonValue
+  priority: $Enums.LeadPriority
   createdAt: Date
   _count: LeadCountAggregateOutputType | null
   _min: LeadMinAggregateOutputType | null
@@ -185,8 +192,10 @@ export type LeadWhereInput = {
   sourceChannel?: Prisma.StringFilter<"Lead"> | string
   sourceExternalId?: Prisma.StringFilter<"Lead"> | string
   sourceMetadata?: Prisma.JsonFilter<"Lead">
+  priority?: Prisma.EnumLeadPriorityFilter<"Lead"> | $Enums.LeadPriority
   createdAt?: Prisma.DateTimeFilter<"Lead"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  interactions?: Prisma.InteractionListRelationFilter
 }
 
 export type LeadOrderByWithRelationInput = {
@@ -195,8 +204,10 @@ export type LeadOrderByWithRelationInput = {
   sourceChannel?: Prisma.SortOrder
   sourceExternalId?: Prisma.SortOrder
   sourceMetadata?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
+  interactions?: Prisma.InteractionOrderByRelationAggregateInput
 }
 
 export type LeadWhereUniqueInput = Prisma.AtLeast<{
@@ -208,8 +219,10 @@ export type LeadWhereUniqueInput = Prisma.AtLeast<{
   sourceChannel?: Prisma.StringFilter<"Lead"> | string
   sourceExternalId?: Prisma.StringFilter<"Lead"> | string
   sourceMetadata?: Prisma.JsonFilter<"Lead">
+  priority?: Prisma.EnumLeadPriorityFilter<"Lead"> | $Enums.LeadPriority
   createdAt?: Prisma.DateTimeFilter<"Lead"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  interactions?: Prisma.InteractionListRelationFilter
 }, "id">
 
 export type LeadOrderByWithAggregationInput = {
@@ -218,6 +231,7 @@ export type LeadOrderByWithAggregationInput = {
   sourceChannel?: Prisma.SortOrder
   sourceExternalId?: Prisma.SortOrder
   sourceMetadata?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.LeadCountOrderByAggregateInput
   _max?: Prisma.LeadMaxOrderByAggregateInput
@@ -233,6 +247,7 @@ export type LeadScalarWhereWithAggregatesInput = {
   sourceChannel?: Prisma.StringWithAggregatesFilter<"Lead"> | string
   sourceExternalId?: Prisma.StringWithAggregatesFilter<"Lead"> | string
   sourceMetadata?: Prisma.JsonWithAggregatesFilter<"Lead">
+  priority?: Prisma.EnumLeadPriorityWithAggregatesFilter<"Lead"> | $Enums.LeadPriority
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Lead"> | Date | string
 }
 
@@ -241,8 +256,10 @@ export type LeadCreateInput = {
   sourceChannel: string
   sourceExternalId: string
   sourceMetadata: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: $Enums.LeadPriority
   createdAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutLeadsInput
+  interactions?: Prisma.InteractionCreateNestedManyWithoutLeadInput
 }
 
 export type LeadUncheckedCreateInput = {
@@ -251,7 +268,9 @@ export type LeadUncheckedCreateInput = {
   sourceChannel: string
   sourceExternalId: string
   sourceMetadata: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: $Enums.LeadPriority
   createdAt?: Date | string
+  interactions?: Prisma.InteractionUncheckedCreateNestedManyWithoutLeadInput
 }
 
 export type LeadUpdateInput = {
@@ -259,8 +278,10 @@ export type LeadUpdateInput = {
   sourceChannel?: Prisma.StringFieldUpdateOperationsInput | string
   sourceExternalId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: Prisma.EnumLeadPriorityFieldUpdateOperationsInput | $Enums.LeadPriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutLeadsNestedInput
+  interactions?: Prisma.InteractionUpdateManyWithoutLeadNestedInput
 }
 
 export type LeadUncheckedUpdateInput = {
@@ -269,7 +290,9 @@ export type LeadUncheckedUpdateInput = {
   sourceChannel?: Prisma.StringFieldUpdateOperationsInput | string
   sourceExternalId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: Prisma.EnumLeadPriorityFieldUpdateOperationsInput | $Enums.LeadPriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  interactions?: Prisma.InteractionUncheckedUpdateManyWithoutLeadNestedInput
 }
 
 export type LeadCreateManyInput = {
@@ -278,6 +301,7 @@ export type LeadCreateManyInput = {
   sourceChannel: string
   sourceExternalId: string
   sourceMetadata: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: $Enums.LeadPriority
   createdAt?: Date | string
 }
 
@@ -286,6 +310,7 @@ export type LeadUpdateManyMutationInput = {
   sourceChannel?: Prisma.StringFieldUpdateOperationsInput | string
   sourceExternalId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: Prisma.EnumLeadPriorityFieldUpdateOperationsInput | $Enums.LeadPriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -295,6 +320,7 @@ export type LeadUncheckedUpdateManyInput = {
   sourceChannel?: Prisma.StringFieldUpdateOperationsInput | string
   sourceExternalId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: Prisma.EnumLeadPriorityFieldUpdateOperationsInput | $Enums.LeadPriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -314,6 +340,7 @@ export type LeadCountOrderByAggregateInput = {
   sourceChannel?: Prisma.SortOrder
   sourceExternalId?: Prisma.SortOrder
   sourceMetadata?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -322,6 +349,7 @@ export type LeadMaxOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   sourceChannel?: Prisma.SortOrder
   sourceExternalId?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -330,7 +358,13 @@ export type LeadMinOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   sourceChannel?: Prisma.SortOrder
   sourceExternalId?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type LeadScalarRelationFilter = {
+  is?: Prisma.LeadWhereInput
+  isNot?: Prisma.LeadWhereInput
 }
 
 export type LeadCreateNestedManyWithoutTenantInput = {
@@ -375,12 +409,32 @@ export type LeadUncheckedUpdateManyWithoutTenantNestedInput = {
   deleteMany?: Prisma.LeadScalarWhereInput | Prisma.LeadScalarWhereInput[]
 }
 
+export type EnumLeadPriorityFieldUpdateOperationsInput = {
+  set?: $Enums.LeadPriority
+}
+
+export type LeadCreateNestedOneWithoutInteractionsInput = {
+  create?: Prisma.XOR<Prisma.LeadCreateWithoutInteractionsInput, Prisma.LeadUncheckedCreateWithoutInteractionsInput>
+  connectOrCreate?: Prisma.LeadCreateOrConnectWithoutInteractionsInput
+  connect?: Prisma.LeadWhereUniqueInput
+}
+
+export type LeadUpdateOneRequiredWithoutInteractionsNestedInput = {
+  create?: Prisma.XOR<Prisma.LeadCreateWithoutInteractionsInput, Prisma.LeadUncheckedCreateWithoutInteractionsInput>
+  connectOrCreate?: Prisma.LeadCreateOrConnectWithoutInteractionsInput
+  upsert?: Prisma.LeadUpsertWithoutInteractionsInput
+  connect?: Prisma.LeadWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LeadUpdateToOneWithWhereWithoutInteractionsInput, Prisma.LeadUpdateWithoutInteractionsInput>, Prisma.LeadUncheckedUpdateWithoutInteractionsInput>
+}
+
 export type LeadCreateWithoutTenantInput = {
   id?: string
   sourceChannel: string
   sourceExternalId: string
   sourceMetadata: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: $Enums.LeadPriority
   createdAt?: Date | string
+  interactions?: Prisma.InteractionCreateNestedManyWithoutLeadInput
 }
 
 export type LeadUncheckedCreateWithoutTenantInput = {
@@ -388,7 +442,9 @@ export type LeadUncheckedCreateWithoutTenantInput = {
   sourceChannel: string
   sourceExternalId: string
   sourceMetadata: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: $Enums.LeadPriority
   createdAt?: Date | string
+  interactions?: Prisma.InteractionUncheckedCreateNestedManyWithoutLeadInput
 }
 
 export type LeadCreateOrConnectWithoutTenantInput = {
@@ -426,7 +482,64 @@ export type LeadScalarWhereInput = {
   sourceChannel?: Prisma.StringFilter<"Lead"> | string
   sourceExternalId?: Prisma.StringFilter<"Lead"> | string
   sourceMetadata?: Prisma.JsonFilter<"Lead">
+  priority?: Prisma.EnumLeadPriorityFilter<"Lead"> | $Enums.LeadPriority
   createdAt?: Prisma.DateTimeFilter<"Lead"> | Date | string
+}
+
+export type LeadCreateWithoutInteractionsInput = {
+  id?: string
+  sourceChannel: string
+  sourceExternalId: string
+  sourceMetadata: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: $Enums.LeadPriority
+  createdAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutLeadsInput
+}
+
+export type LeadUncheckedCreateWithoutInteractionsInput = {
+  id?: string
+  tenantId: string
+  sourceChannel: string
+  sourceExternalId: string
+  sourceMetadata: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: $Enums.LeadPriority
+  createdAt?: Date | string
+}
+
+export type LeadCreateOrConnectWithoutInteractionsInput = {
+  where: Prisma.LeadWhereUniqueInput
+  create: Prisma.XOR<Prisma.LeadCreateWithoutInteractionsInput, Prisma.LeadUncheckedCreateWithoutInteractionsInput>
+}
+
+export type LeadUpsertWithoutInteractionsInput = {
+  update: Prisma.XOR<Prisma.LeadUpdateWithoutInteractionsInput, Prisma.LeadUncheckedUpdateWithoutInteractionsInput>
+  create: Prisma.XOR<Prisma.LeadCreateWithoutInteractionsInput, Prisma.LeadUncheckedCreateWithoutInteractionsInput>
+  where?: Prisma.LeadWhereInput
+}
+
+export type LeadUpdateToOneWithWhereWithoutInteractionsInput = {
+  where?: Prisma.LeadWhereInput
+  data: Prisma.XOR<Prisma.LeadUpdateWithoutInteractionsInput, Prisma.LeadUncheckedUpdateWithoutInteractionsInput>
+}
+
+export type LeadUpdateWithoutInteractionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceChannel?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceExternalId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: Prisma.EnumLeadPriorityFieldUpdateOperationsInput | $Enums.LeadPriority
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutLeadsNestedInput
+}
+
+export type LeadUncheckedUpdateWithoutInteractionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceChannel?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceExternalId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: Prisma.EnumLeadPriorityFieldUpdateOperationsInput | $Enums.LeadPriority
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeadCreateManyTenantInput = {
@@ -434,6 +547,7 @@ export type LeadCreateManyTenantInput = {
   sourceChannel: string
   sourceExternalId: string
   sourceMetadata: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: $Enums.LeadPriority
   createdAt?: Date | string
 }
 
@@ -442,7 +556,9 @@ export type LeadUpdateWithoutTenantInput = {
   sourceChannel?: Prisma.StringFieldUpdateOperationsInput | string
   sourceExternalId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: Prisma.EnumLeadPriorityFieldUpdateOperationsInput | $Enums.LeadPriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  interactions?: Prisma.InteractionUpdateManyWithoutLeadNestedInput
 }
 
 export type LeadUncheckedUpdateWithoutTenantInput = {
@@ -450,7 +566,9 @@ export type LeadUncheckedUpdateWithoutTenantInput = {
   sourceChannel?: Prisma.StringFieldUpdateOperationsInput | string
   sourceExternalId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: Prisma.EnumLeadPriorityFieldUpdateOperationsInput | $Enums.LeadPriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  interactions?: Prisma.InteractionUncheckedUpdateManyWithoutLeadNestedInput
 }
 
 export type LeadUncheckedUpdateManyWithoutTenantInput = {
@@ -458,9 +576,39 @@ export type LeadUncheckedUpdateManyWithoutTenantInput = {
   sourceChannel?: Prisma.StringFieldUpdateOperationsInput | string
   sourceExternalId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceMetadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  priority?: Prisma.EnumLeadPriorityFieldUpdateOperationsInput | $Enums.LeadPriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type LeadCountOutputType
+ */
+
+export type LeadCountOutputType = {
+  interactions: number
+}
+
+export type LeadCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  interactions?: boolean | LeadCountOutputTypeCountInteractionsArgs
+}
+
+/**
+ * LeadCountOutputType without action
+ */
+export type LeadCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LeadCountOutputType
+   */
+  select?: Prisma.LeadCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * LeadCountOutputType without action
+ */
+export type LeadCountOutputTypeCountInteractionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InteractionWhereInput
+}
 
 
 export type LeadSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -469,8 +617,11 @@ export type LeadSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   sourceChannel?: boolean
   sourceExternalId?: boolean
   sourceMetadata?: boolean
+  priority?: boolean
   createdAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  interactions?: boolean | Prisma.Lead$interactionsArgs<ExtArgs>
+  _count?: boolean | Prisma.LeadCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lead"]>
 
 export type LeadSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -479,6 +630,7 @@ export type LeadSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   sourceChannel?: boolean
   sourceExternalId?: boolean
   sourceMetadata?: boolean
+  priority?: boolean
   createdAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lead"]>
@@ -489,6 +641,7 @@ export type LeadSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   sourceChannel?: boolean
   sourceExternalId?: boolean
   sourceMetadata?: boolean
+  priority?: boolean
   createdAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lead"]>
@@ -499,12 +652,15 @@ export type LeadSelectScalar = {
   sourceChannel?: boolean
   sourceExternalId?: boolean
   sourceMetadata?: boolean
+  priority?: boolean
   createdAt?: boolean
 }
 
-export type LeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "sourceChannel" | "sourceExternalId" | "sourceMetadata" | "createdAt", ExtArgs["result"]["lead"]>
+export type LeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "sourceChannel" | "sourceExternalId" | "sourceMetadata" | "priority" | "createdAt", ExtArgs["result"]["lead"]>
 export type LeadInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  interactions?: boolean | Prisma.Lead$interactionsArgs<ExtArgs>
+  _count?: boolean | Prisma.LeadCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LeadIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -517,6 +673,7 @@ export type $LeadPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "Lead"
   objects: {
     tenant: Prisma.$TenantPayload<ExtArgs>
+    interactions: Prisma.$InteractionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -524,6 +681,7 @@ export type $LeadPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     sourceChannel: string
     sourceExternalId: string
     sourceMetadata: runtime.JsonValue
+    priority: $Enums.LeadPriority
     createdAt: Date
   }, ExtArgs["result"]["lead"]>
   composites: {}
@@ -920,6 +1078,7 @@ readonly fields: LeadFieldRefs;
 export interface Prisma__LeadClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  interactions<T extends Prisma.Lead$interactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Lead$interactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InteractionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -954,6 +1113,7 @@ export interface LeadFieldRefs {
   readonly sourceChannel: Prisma.FieldRef<"Lead", 'String'>
   readonly sourceExternalId: Prisma.FieldRef<"Lead", 'String'>
   readonly sourceMetadata: Prisma.FieldRef<"Lead", 'Json'>
+  readonly priority: Prisma.FieldRef<"Lead", 'LeadPriority'>
   readonly createdAt: Prisma.FieldRef<"Lead", 'DateTime'>
 }
     
@@ -1348,6 +1508,30 @@ export type LeadDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Limit how many Leads to delete.
    */
   limit?: number
+}
+
+/**
+ * Lead.interactions
+ */
+export type Lead$interactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Interaction
+   */
+  select?: Prisma.InteractionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Interaction
+   */
+  omit?: Prisma.InteractionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InteractionInclude<ExtArgs> | null
+  where?: Prisma.InteractionWhereInput
+  orderBy?: Prisma.InteractionOrderByWithRelationInput | Prisma.InteractionOrderByWithRelationInput[]
+  cursor?: Prisma.InteractionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InteractionScalarFieldEnum | Prisma.InteractionScalarFieldEnum[]
 }
 
 /**

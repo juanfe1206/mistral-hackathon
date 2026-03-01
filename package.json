@@ -12,6 +12,7 @@
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
+    "backfill:interactions": "tsx scripts/backfill-interactions.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

@@ -10,5 +10,6 @@
  */
 export type * from './models/Tenant'
 export type * from './models/Lead'
+export type * from './models/Interaction'
 export type * from './models/IngestionFailure'
 export type * from './commonInputTypes'

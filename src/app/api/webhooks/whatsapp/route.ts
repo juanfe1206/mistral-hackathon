@@ -163,11 +163,16 @@ export async function POST(request: NextRequest) {
   try {
     const tenantId = await leadService.getOrCreateDefaultTenant();
     for (const meta of metas) {
+      const ts = meta.sourceMetadata?.timestamp;
+      const initialInteractionOccurredAt = ts
+        ? new Date(parseInt(String(ts), 10) * 1000)
+        : undefined;
       const lead = await leadService.createLead({
         tenantId,
         sourceChannel: meta.sourceChannel,
         sourceExternalId: meta.sourceExternalId,
         sourceMetadata: meta.sourceMetadata,
+        initialInteractionOccurredAt,
       });
 
       // Emit lead.ingested (log for now if event infra deferred)

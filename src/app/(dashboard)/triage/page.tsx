@@ -7,6 +7,7 @@ interface Lead {
   id: string;
   source_channel: string;
   source_external_id: string;
+  priority: "vip" | "high" | "low";
   created_at: string;
 }
 
@@ -24,31 +25,34 @@ export default function TriagePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [leadsRes, failuresRes] = await Promise.all([
-          fetch("/api/leads"),
-          fetch("/api/ingestion-failures?limit=10"),
-        ]);
-        const [leadsJson, failuresJson] = await Promise.all([
-          leadsRes.json(),
-          failuresRes.json(),
-        ]);
-        if (!leadsRes.ok || leadsJson.error) {
-          setError(leadsJson.error?.message ?? "Request failed");
-          return;
-        }
-        setLeads(leadsJson.data ?? []);
-        if (failuresRes.ok && failuresJson.data?.length) {
-          setFailures(failuresJson.data);
-        }
-      } catch (err) {
-        setError(String(err));
-      } finally {
-        setLoading(false);
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [leadsRes, failuresRes] = await Promise.all([
+        fetch("/api/leads"),
+        fetch("/api/ingestion-failures?limit=10"),
+      ]);
+      const [leadsJson, failuresJson] = await Promise.all([
+        leadsRes.json(),
+        failuresRes.json(),
+      ]);
+      if (!leadsRes.ok || leadsJson.error) {
+        setError(leadsJson.error?.message ?? "Request failed");
+        return;
       }
-    };
+      setLeads(leadsJson.data ?? []);
+      if (failuresRes.ok && failuresJson.data?.length) {
+        setFailures(failuresJson.data);
+      }
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadData();
   }, []);
 
@@ -70,9 +74,27 @@ export default function TriagePage() {
 
   return (
     <div style={{ padding: "1.5rem", maxWidth: 960, margin: "0 auto" }}>
-      <h1 style={{ fontSize: "1.5rem", fontWeight: 600, marginBottom: "1rem" }}>
-        Triage Queue
-      </h1>
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: 600, margin: 0 }}>
+          Triage Queue
+        </h1>
+        <button
+          type="button"
+          onClick={loadData}
+          disabled={loading}
+          style={{
+            padding: "0.4rem 0.75rem",
+            fontSize: "0.875rem",
+            border: "1px solid rgba(128,128,128,0.4)",
+            borderRadius: 6,
+            background: "var(--background)",
+            color: "var(--foreground)",
+            cursor: loading ? "not-allowed" : "pointer",
+          }}
+        >
+          {loading ? "Refreshing…" : "Refresh"}
+        </button>
+      </div>
       <p style={{ color: "var(--foreground)", opacity: 0.8, marginBottom: "1rem" }}>
         Inbound leads from WhatsApp
       </p>
@@ -123,8 +145,27 @@ export default function TriagePage() {
                 color: "var(--foreground)",
               }}
             >
-              <div style={{ fontWeight: 600 }}>
-                {lead.source_external_id} · {lead.source_channel}
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                <span
+                  style={{
+                    fontSize: "0.7rem",
+                    fontWeight: 600,
+                    padding: "0.15rem 0.4rem",
+                    borderRadius: 4,
+                    textTransform: "uppercase",
+                    backgroundColor:
+                      lead.priority === "vip"
+                        ? "rgba(180, 100, 20, 0.25)"
+                        : lead.priority === "high"
+                          ? "rgba(80, 120, 200, 0.2)"
+                          : "rgba(128, 128, 128, 0.2)",
+                  }}
+                >
+                  {lead.priority}
+                </span>
+                <span style={{ fontWeight: 600 }}>
+                  {lead.source_external_id} · {lead.source_channel}
+                </span>
               </div>
               <div style={{ fontSize: "0.875rem", opacity: 0.7 }}>
                 {new Date(lead.created_at).toLocaleString()}

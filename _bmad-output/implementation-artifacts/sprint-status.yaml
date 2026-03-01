@@ -43,7 +43,7 @@ development_status:
   epic-1: in-progress
   1-0-initialize-project-from-approved-starter-template: done
   1-1-ingest-whatsapp-leads-with-source-metadata: done
-  1-2-persist-interaction-timeline-and-ranked-queue-view: ready-for-dev
+  1-2-persist-interaction-timeline-and-ranked-queue-view: done
   epic-1-retrospective: optional
 
   epic-2: backlog
