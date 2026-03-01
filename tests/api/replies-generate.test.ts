@@ -38,7 +38,21 @@ describe("POST /api/replies/generate", () => {
     expect(mockGenerateRecoveryDraft).toHaveBeenCalledWith(
       LEAD_ID,
       TENANT_ID,
-      expect.objectContaining({ correlationId: expect.any(String) })
+      expect.objectContaining({ correlationId: expect.any(String), tone: "warm" })
+    );
+  });
+
+  it("passes tone when provided", async () => {
+    const request = new NextRequest("http://localhost/api/replies/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lead_id: LEAD_ID, tone: "direct" }),
+    });
+    await POST(request);
+    expect(mockGenerateRecoveryDraft).toHaveBeenCalledWith(
+      LEAD_ID,
+      TENANT_ID,
+      expect.objectContaining({ tone: "direct" })
     );
   });
 

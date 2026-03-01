@@ -75,7 +75,7 @@ describe("reply-service", () => {
           messages: expect.arrayContaining([
             expect.objectContaining({
               role: "system",
-              content: expect.stringContaining("concierge"),
+              content: expect.stringContaining("Tone: warm"),
             }),
             expect.objectContaining({
               role: "user",
@@ -89,6 +89,20 @@ describe("reply-service", () => {
           tenantId: TENANT_ID,
           eventType: "reply.generated",
           payload: expect.objectContaining({ lead_id: LEAD_ID }),
+        })
+      );
+    });
+
+    it("applies the selected tone in the system prompt", async () => {
+      await replyService.generateRecoveryDraft(LEAD_ID, TENANT_ID, { tone: "direct" });
+      expect(mockChatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: expect.arrayContaining([
+            expect.objectContaining({
+              role: "system",
+              content: expect.stringContaining("Tone: direct"),
+            }),
+          ]),
         })
       );
     });

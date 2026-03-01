@@ -12,8 +12,18 @@ import * as auditRepository from "@/server/repositories/audit-repository";
 const MODEL = "mistral-small-latest";
 const MAX_TOKENS = 256;
 
-const RECOVERY_SYSTEM_PROMPT = `You write concise, warm recovery messages for a salon. Tone: premium concierge, friendly, non-pushy.
+export type RecoveryTone = "warm" | "neutral" | "direct";
+
+function buildRecoverySystemPrompt(tone: RecoveryTone): string {
+  const toneInstruction =
+    tone === "warm"
+      ? "Tone: warm, premium concierge, empathetic and friendly."
+      : tone === "neutral"
+        ? "Tone: neutral, premium concierge, clear and balanced."
+        : "Tone: direct, premium concierge, concise and action-oriented without sounding harsh.";
+  return `You write concise recovery messages for a salon. ${toneInstruction}
 Output ONLY the message body—no greetings, no meta-commentary. Keep it under 100 words.`;
+}
 
 /**
  * Generate a recovery draft for an at-risk lead using Mistral.
@@ -22,7 +32,7 @@ Output ONLY the message body—no greetings, no meta-commentary. Keep it under 1
 export async function generateRecoveryDraft(
   leadId: string,
   tenantId: string,
-  options?: { correlationId?: string }
+  options?: { correlationId?: string; tone?: RecoveryTone }
 ): Promise<string> {
   const lead = await leadRepository.findLeadById(leadId, tenantId);
   if (!lead) throw new Error(`Lead ${leadId} not found`);
@@ -51,6 +61,7 @@ export async function generateRecoveryDraft(
   if (!apiKey) throw new Error("MISTRAL_API_KEY is not configured");
 
   const client = new Mistral({ apiKey });
+  const tone = options?.tone ?? "warm";
   const userContent = `Write a recovery message for this at-risk lead:
 
 Channel: ${lead.sourceChannel}
@@ -63,7 +74,7 @@ Return only the message text.`;
   const result = await client.chat.complete({
     model: MODEL,
     messages: [
-      { role: "system", content: RECOVERY_SYSTEM_PROMPT },
+      { role: "system", content: buildRecoverySystemPrompt(tone) },
       { role: "user", content: userContent },
     ],
     maxTokens: MAX_TOKENS,

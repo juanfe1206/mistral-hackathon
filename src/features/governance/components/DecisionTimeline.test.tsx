@@ -69,6 +69,19 @@ describe("DecisionTimeline", () => {
     expect(screen.getByText(/State transition unavailable/i)).toBeInTheDocument();
   });
 
+  it("supports keyboard expansion with Space key", () => {
+    render(
+      <TestWrapper>
+        <DecisionTimeline items={BASE_ITEMS} />
+      </TestWrapper>
+    );
+
+    const expandButton = screen.getAllByRole("button", { name: /Expand details/i })[0];
+    expect(expandButton).toHaveAttribute("aria-expanded", "false");
+    fireEvent.keyDown(expandButton, { key: " ", code: "Space" });
+    expect(expandButton).toHaveAttribute("aria-expanded", "true");
+  });
+
   it("filters events by event type and toggles audit variant", () => {
     render(
       <TestWrapper>

@@ -178,6 +178,12 @@ export function DecisionTimeline({
                   size="small"
                   sx={{ mt: 1 }}
                   onClick={() => toggleExpanded(item.id)}
+                  onKeyDown={(event) => {
+                    if (event.key === " " || event.key === "Spacebar") {
+                      event.preventDefault();
+                      toggleExpanded(item.id);
+                    }
+                  }}
                   aria-expanded={isExpanded}
                   aria-controls={panelId}
                 >

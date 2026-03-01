@@ -40,13 +40,17 @@ function getTransition(eventType: string, payload: Record<string, unknown>): str
   }
 
   if (eventType === "action.approved") return "Draft: generated -> approved";
-  if (eventType === "action.sent") return "Draft: approved -> sent";
+  if (eventType === "action.sent") {
+    if (payload.approval_required === true) return "Draft: approved -> sent";
+    if (payload.approval_required === false) return "Draft: generated -> sent";
+  }
 
   return toOptionalText(payload.transition);
 }
 
-function getActor(payload: Record<string, unknown>): string | null {
+function getActor(payload: Record<string, unknown>, actorId?: unknown): string | null {
   return (
+    toOptionalText(actorId) ??
     toOptionalText(payload.actor) ??
     toOptionalText(payload.actor_id) ??
     toOptionalText(payload.user_id)
@@ -124,7 +128,7 @@ export async function GET(
           event_type: i.eventType,
           event_label: toEventLabel(i.eventType),
           occurred_at: i.occurredAt.toISOString(),
-          actor: getActor(asRecord(i.payload)),
+          actor: getActor(asRecord(i.payload), (i as { actorId?: string | null }).actorId),
           rationale: getRationale(asRecord(i.payload)),
           transition: getTransition(i.eventType, asRecord(i.payload)),
           source: i.eventType.includes(".") ? "audit" : "interaction",

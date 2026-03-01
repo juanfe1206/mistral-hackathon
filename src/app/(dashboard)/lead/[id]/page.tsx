@@ -181,7 +181,7 @@ export default function LeadDetailPage() {
       const res = await fetch("/api/replies/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lead_id: id }),
+        body: JSON.stringify({ lead_id: id, tone }),
       });
       const json = await res.json();
       if (res.ok && json.data?.draft) {
@@ -299,6 +299,16 @@ export default function LeadDetailPage() {
   const hasClassification = (lead.reason_tags?.length ?? 0) > 0;
   const showMistralBanner = !hasClassification || (lead.risk_pulses?.length && !draft);
   const activePulse = (lead.risk_pulses ?? [])[0] ?? null;
+  const atRiskDetectedAt = activePulse?.detected_at ?? lead.created_at;
+  const atRiskReason = activePulse?.reason ?? "At-risk lead requires recovery outreach.";
+  const atRiskState =
+    activePulse?.status === "resolved"
+      ? "resolved"
+      : activePulse?.status === "acknowledged"
+        ? "acknowledged"
+        : activePulse?.status
+          ? "escalated"
+          : "monitoring";
   const confidenceMarker = draft.trim().length > 0 ? (lead.priority === "vip" ? 0.92 : lead.priority === "high" ? 0.81 : 0.74) : null;
   const composerStatus: ComposerStatus = replyError
     ? "failed"
@@ -513,13 +523,13 @@ export default function LeadDetailPage() {
           </span>
         )}
       </h1>
-      {lead.lifecycle_state === "at_risk" && activePulse && (
+      {lead.lifecycle_state === "at_risk" && (
         <div style={{ marginBottom: "1rem" }}>
           <AtRiskPulseBanner
             variant="inline"
-            state={activePulse.status === "resolved" ? "resolved" : activePulse.status === "acknowledged" ? "acknowledged" : "escalated"}
-            reason={`${activePulse.reason} · Detected ${new Date(activePulse.detected_at).toLocaleString()}`}
-            detectedAt={activePulse.detected_at}
+            state={atRiskState}
+            reason={`${atRiskReason} · Detected ${new Date(atRiskDetectedAt).toLocaleString()}`}
+            detectedAt={atRiskDetectedAt}
             primaryAction={{
               label: markingLifecycle ? "Updating..." : "Mark recovered",
               onClick: () => handleMarkLifecycle("recovered"),
@@ -612,29 +622,6 @@ export default function LeadDetailPage() {
           >
             Dismiss
           </button>
-        </div>
-      )}
-      {(lead.override_history ?? []).length > 0 && (
-        <div
-          style={{
-            padding: "1rem",
-            border: "1px solid rgba(128,128,128,0.3)",
-            borderRadius: 8,
-            marginBottom: "1rem",
-          }}
-        >
-          <h2 style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "0.5rem" }}>
-            Override trace
-          </h2>
-          <ul style={{ margin: 0, paddingLeft: "1.25rem", fontSize: "0.875rem" }}>
-            {(lead.override_history ?? []).map((o, idx) => (
-              <li key={idx} style={{ marginBottom: "0.35rem" }}>
-                Overridden from <strong>{o.previous_priority}</strong> to{" "}
-                <strong>{o.new_priority}</strong>
-                {o.reason ? ` — ${o.reason}` : ""} · {new Date(o.created_at).toLocaleString()}
-              </li>
-            ))}
-          </ul>
         </div>
       )}
       {(lead.reason_tags ?? []).length > 0 && (

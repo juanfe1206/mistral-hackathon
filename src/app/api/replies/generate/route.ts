@@ -7,6 +7,7 @@ import * as replyService from "@/server/services/reply-service";
 
 const generateBodySchema = z.object({
   lead_id: z.string().uuid(),
+  tone: z.enum(["warm", "neutral", "direct"]).optional().default("warm"),
 });
 
 /**
@@ -53,10 +54,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { lead_id } = parsed.data;
+    const { lead_id, tone } = parsed.data;
 
     const draft = await replyService.generateRecoveryDraft(lead_id, tenantId, {
       correlationId: requestId,
+      tone,
     });
 
     return NextResponse.json(

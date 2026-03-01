@@ -90,6 +90,11 @@ describe("approval-service", () => {
       expect(mockCreateAuditEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           eventType: "action.sent",
+          payload: expect.objectContaining({
+            lead_id: LEAD_ID,
+            draft_id: "draft-sent",
+            approval_required: false,
+          }),
         })
       );
     });
@@ -172,6 +177,11 @@ describe("approval-service", () => {
       expect(mockCreateAuditEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           eventType: "action.sent",
+          payload: expect.objectContaining({
+            lead_id: LEAD_ID,
+            draft_id: "draft-approved",
+            approval_required: true,
+          }),
         })
       );
     });

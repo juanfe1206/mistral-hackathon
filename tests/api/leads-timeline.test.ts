@@ -74,10 +74,10 @@ describe("GET /api/leads/[id]/timeline", () => {
         leadId: LEAD_ID,
         tenantId: TENANT_ID,
         eventType: "priority.overridden",
+        actorId: "agent-7",
         occurredAt: new Date("2024-01-03T12:00:00Z"),
         payload: {
           lead_id: LEAD_ID,
-          actor_id: "agent-7",
           reason: "VIP escalation",
           previous_priority: "high",
           new_priority: "vip",
@@ -99,6 +99,39 @@ describe("GET /api/leads/[id]/timeline", () => {
     expect(json.data[0].transition).toBe("Priority: high -> vip");
     expect(json.data[0].source).toBe("audit");
     expect(json.data[0].flagged).toBe(true);
+  });
+
+  it("maps action.sent transition based on approval requirement", async () => {
+    mockGetTimelineForLead.mockResolvedValue([
+      {
+        id: "a2",
+        leadId: LEAD_ID,
+        tenantId: TENANT_ID,
+        eventType: "action.sent",
+        occurredAt: new Date("2024-01-03T12:10:00Z"),
+        payload: { lead_id: LEAD_ID, approval_required: false },
+        createdAt: new Date("2024-01-03T12:10:01Z"),
+      },
+      {
+        id: "a3",
+        leadId: LEAD_ID,
+        tenantId: TENANT_ID,
+        eventType: "action.sent",
+        occurredAt: new Date("2024-01-03T12:11:00Z"),
+        payload: { lead_id: LEAD_ID, approval_required: true },
+        createdAt: new Date("2024-01-03T12:11:01Z"),
+      },
+    ]);
+
+    const request = new NextRequest(`http://localhost/api/leads/${LEAD_ID}/timeline`);
+    const response = await GET(request, {
+      params: Promise.resolve({ id: LEAD_ID }),
+    });
+    expect(response.status).toBe(200);
+    const json = await response.json();
+
+    expect(json.data[0].transition).toBe("Draft: generated -> sent");
+    expect(json.data[1].transition).toBe("Draft: approved -> sent");
   });
 
   it("returns 404 when lead not found", async () => {

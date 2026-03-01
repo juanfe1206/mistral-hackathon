@@ -88,6 +88,7 @@ export async function getTimelineForLead(
     leadId,
     tenantId: event.tenantId,
     eventType: event.eventType,
+    actorId: event.actorId,
     occurredAt: event.occurredAt,
     payload: event.payload as Record<string, unknown>,
     createdAt: event.createdAt,
