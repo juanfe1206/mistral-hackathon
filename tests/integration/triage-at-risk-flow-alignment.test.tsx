@@ -6,12 +6,22 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import TriagePage from "@/app/(dashboard)/triage/page";
 import AtRiskPage from "@/app/(dashboard)/at-risk/page";
 
-const { pushMock } = vi.hoisted(() => ({
+const { pushMock, getSearchParamsMock, setSearchParamsMock } = vi.hoisted(() => {
+  let searchParamsValue = "";
+  let searchParams = new URLSearchParams(searchParamsValue);
+  return ({
   pushMock: vi.fn(),
-}));
+    getSearchParamsMock: () => searchParams,
+    setSearchParamsMock: (value: string) => {
+      searchParamsValue = value;
+      searchParams = new URLSearchParams(searchParamsValue);
+    },
+  });
+});
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: pushMock }),
+  useSearchParams: () => getSearchParamsMock(),
 }));
 
 function jsonResponse(data: unknown, ok = true): Promise<Response> {
@@ -25,6 +35,7 @@ function jsonResponse(data: unknown, ok = true): Promise<Response> {
 describe("triage and at-risk flow alignment", () => {
   beforeEach(() => {
     pushMock.mockReset();
+    setSearchParamsMock("");
     vi.spyOn(global, "fetch").mockImplementation((input: URL | RequestInfo) => {
       const url = String(input);
 
@@ -133,6 +144,28 @@ describe("triage and at-risk flow alignment", () => {
     expect(leadLink).toHaveAttribute("href", expect.stringContaining("/lead/lead-1?"));
     expect(leadLink).toHaveAttribute("href", expect.stringContaining("from=triage"));
     expect(leadLink).toHaveAttribute("href", expect.stringContaining("sort=priority_desc"));
+  });
+
+  it("restores triage filters and sort from URL params", async () => {
+    setSearchParamsMock("sort=created_desc&priority=vip&lifecycle=at_risk&source=whatsapp");
+    render(<TriagePage />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: /Triage Queue/i })).toBeInTheDocument();
+    });
+
+    const vipChip = screen.getByRole("button", { name: /Filter by VIP priority/i });
+    const atRiskChip = screen.getByRole("button", { name: /Filter by lifecycle: At Risk/i });
+    const sourceChip = screen.getByRole("button", { name: /Filter by source: WhatsApp/i });
+    expect(vipChip).toHaveAttribute("aria-pressed", "true");
+    expect(atRiskChip).toHaveAttribute("aria-pressed", "true");
+    expect(sourceChip).toHaveAttribute("aria-pressed", "true");
+
+    const leadLink = screen.getByRole("link", { name: /View lead 15550000001/i });
+    expect(leadLink).toHaveAttribute("href", expect.stringContaining("sort=created_desc"));
+    expect(leadLink).toHaveAttribute("href", expect.stringContaining("priority=vip"));
+    expect(leadLink).toHaveAttribute("href", expect.stringContaining("lifecycle=at_risk"));
+    expect(leadLink).toHaveAttribute("href", expect.stringContaining("source=whatsapp"));
   });
 
   it("routes at-risk CTA directly to lead recovery context", async () => {

@@ -183,6 +183,9 @@ GPT-5 Codex
 - 2026-03-01: Updated at-risk recovery CTA to open lead detail with source context (`from=at-risk`) and updated lead detail back-link behavior based on navigation origin.
 - 2026-03-01: Added integration test coverage for triage hierarchy and at-risk direct routing; updated lead-detail integration mocks for `useSearchParams`.
 - 2026-03-01: Verified with `pnpm test -- tests/integration/lead-detail-recovery-flow.test.tsx tests/integration/lead-detail-governance-timeline.test.tsx tests/integration/triage-at-risk-flow-alignment.test.tsx` and `pnpm lint` (warnings only, no errors).
+- 2026-03-01: Follow-up fix applied after code review: triage now restores `sort` and filter state from URL query params, with validation of allowed values.
+- 2026-03-01: Added integration assertion for URL-param-based triage state restoration to prevent regressions in back-and-forth flow.
+- 2026-03-01: Documented concurrent branch changes outside Story 4.4 scope for file-list traceability.
 
 ### File List
 
@@ -196,7 +199,18 @@ GPT-5 Codex
 - tests/integration/lead-detail-recovery-flow.test.tsx (modified)
 - tests/integration/lead-detail-governance-timeline.test.tsx (modified)
 
+### Concurrent Branch Changes (Out of Story 4.4 Scope)
+
+- _bmad-output/implementation-artifacts/4-3-implement-phase-3-governance-component.md (modified)
+- _bmad-output/implementation-artifacts/code-review-4-3-2026-03-01.md (modified)
+- src/components/SLASafetyIndicator.tsx (modified)
+- src/server/services/sla-service.ts (modified)
+- src/features/governance/components/DecisionTimeline.tsx (modified)
+- src/features/governance/components/DecisionTimeline.test.tsx (modified)
+- tests/api/leads-detail.test.ts (modified)
+
 ## Change Log
 
 - 2026-03-01: Story created and set to `ready-for-dev`.
 - 2026-03-01: Story implemented and set to `review`.
+- 2026-03-01: Applied code-review follow-up fixes for triage context restoration and integration coverage; updated traceability notes for concurrent branch edits.

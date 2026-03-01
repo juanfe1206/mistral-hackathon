@@ -8,11 +8,13 @@ export async function GET(request: NextRequest) {
   const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();
 
   try {
+    const tenantIdHeader = request.headers.get("x-tenant-id");
     const tenantIdParam = request.nextUrl.searchParams.get("tenant_id");
+    const tenantIdCandidate = tenantIdHeader ?? tenantIdParam;
     const tenantId =
-      tenantIdParam ?? (await leadService.getOrCreateDefaultTenant());
+      tenantIdCandidate ?? (await leadService.getOrCreateDefaultTenant());
 
-    if (tenantIdParam && !isValidUuid(tenantIdParam)) {
+    if (tenantIdCandidate && !isValidUuid(tenantIdCandidate)) {
       return NextResponse.json(
         createErrorResponse("INVALID_INPUT", "tenant_id must be a valid UUID", [], requestId),
         { status: 400 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
 import {
   QueueSlaIndicator,
@@ -31,6 +32,40 @@ interface IngestionFailure {
   message: string;
   details?: unknown;
   created_at: string;
+}
+
+const VALID_SORT_OPTIONS: ReadonlySet<QueueSortOption> = new Set([
+  "priority_desc",
+  "created_desc",
+  "sla_soonest",
+]);
+
+function parseInitialTriageState(searchParams: { get: (name: string) => string | null }): {
+  filters: QueueFilterBarFilters;
+  sort: QueueSortOption;
+} {
+  const sortParam = searchParams.get("sort");
+  const sort: QueueSortOption =
+    sortParam != null && VALID_SORT_OPTIONS.has(sortParam as QueueSortOption)
+      ? (sortParam as QueueSortOption)
+      : "priority_desc";
+
+  const priorityParam = searchParams.get("priority");
+  const lifecycleParam = searchParams.get("lifecycle");
+  const sourceParam = searchParams.get("source");
+
+  const filters: QueueFilterBarFilters = {};
+  if (priorityParam === "vip" || priorityParam === "high" || priorityParam === "low") {
+    filters.priority = priorityParam;
+  }
+  if (lifecycleParam === "at_risk" || lifecycleParam === "recovered" || lifecycleParam === "lost") {
+    filters.lifecycle = lifecycleParam;
+  }
+  if (sourceParam === "whatsapp") {
+    filters.source = sourceParam;
+  }
+
+  return { filters, sort };
 }
 
 function sortLeads(leads: Lead[], sort: QueueSortOption): Lead[] {
@@ -73,16 +108,22 @@ function buildLeadDetailHref(leadId: string, filters: QueueFilterBarFilters, sor
 }
 
 export default function TriagePage() {
+  const searchParams = useSearchParams();
+  const searchParamsKey = searchParams.toString();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const initialTriageState = useMemo(
+    () => parseInitialTriageState(new URLSearchParams(searchParamsKey)),
+    [searchParamsKey]
+  );
   const [leads, setLeads] = useState<Lead[]>([]);
   const [failures, setFailures] = useState<IngestionFailure[]>([]);
   const [slaSummary, setSlaSummary] = useState<QueueSlaSummary | null>(null);
   const [slaUnavailable, setSlaUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<QueueFilterBarFilters>({});
-  const [sort, setSort] = useState<QueueSortOption>("priority_desc");
+  const [filters, setFilters] = useState<QueueFilterBarFilters>(initialTriageState.filters);
+  const [sort, setSort] = useState<QueueSortOption>(initialTriageState.sort);
 
   const loadData = async () => {
     setLoading(true);
@@ -123,6 +164,12 @@ export default function TriagePage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    const nextState = parseInitialTriageState(new URLSearchParams(searchParamsKey));
+    setFilters(nextState.filters);
+    setSort(nextState.sort);
+  }, [searchParamsKey]);
 
   const filteredLeads = useMemo(() => filterLeads(leads, filters), [leads, filters]);
   const sortedLeads = useMemo(() => sortLeads(filteredLeads, sort), [filteredLeads, sort]);

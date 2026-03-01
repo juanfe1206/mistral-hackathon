@@ -59,9 +59,9 @@ describe("GET /api/leads (ranked queue)", () => {
       classifications: [{ reasonTags: [] }],
     };
     mockGetLeadsWithSlaStatus.mockResolvedValue([
-      { lead: lead1, sla_status: { status: "safe" as const, minutes_to_breach: null, minutes_over: null, first_response_at: null } },
-      { lead: lead2, sla_status: { status: "warning" as const, minutes_to_breach: 1, minutes_over: null, first_response_at: null } },
-      { lead: lead3, sla_status: { status: "n_a" as const, minutes_to_breach: null, minutes_over: null, first_response_at: null } },
+      { lead: lead1, sla_status: { status: "safe" as const, minutes_to_breach: null, minutes_over: null, first_response_at: null, response_minutes: null } },
+      { lead: lead2, sla_status: { status: "warning" as const, minutes_to_breach: 1, minutes_over: null, first_response_at: null, response_minutes: null } },
+      { lead: lead3, sla_status: { status: "n_a" as const, minutes_to_breach: null, minutes_over: null, first_response_at: null, response_minutes: null } },
     ]);
     const request = new NextRequest("http://localhost/api/leads");
     const response = await GET(request);
@@ -77,8 +77,8 @@ describe("GET /api/leads (ranked queue)", () => {
     expect(json.data[0].reason_tags).toEqual(["repeat customer"]);
     expect(json.data[1].reason_tags).toEqual(["urgent inquiry"]);
     expect(json.data[2].reason_tags).toEqual([]);
-    expect(json.data[0].sla_status).toEqual({ status: "safe", minutes_to_breach: null, minutes_over: null, first_response_at: null });
-    expect(json.data[1].sla_status).toEqual({ status: "warning", minutes_to_breach: 1, minutes_over: null, first_response_at: null });
-    expect(json.data[2].sla_status).toEqual({ status: "n_a", minutes_to_breach: null, minutes_over: null, first_response_at: null });
+    expect(json.data[0].sla_status).toEqual({ status: "safe", minutes_to_breach: null, minutes_over: null, first_response_at: null, response_minutes: null });
+    expect(json.data[1].sla_status).toEqual({ status: "warning", minutes_to_breach: 1, minutes_over: null, first_response_at: null, response_minutes: null });
+    expect(json.data[2].sla_status).toEqual({ status: "n_a", minutes_to_breach: null, minutes_over: null, first_response_at: null, response_minutes: null });
   });
 });

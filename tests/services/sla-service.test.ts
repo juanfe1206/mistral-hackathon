@@ -50,6 +50,7 @@ describe("sla-service", () => {
         minutes_to_breach: null,
         minutes_over: null,
         first_response_at: null,
+        response_minutes: null,
       });
     });
 
@@ -77,6 +78,7 @@ describe("sla-service", () => {
       const result = await slaService.getLeadSlaStatus(LEAD_ID, TENANT_ID);
       expect(result?.status).toBe("safe");
       expect(result?.first_response_at).toBe("2024-01-01T12:09:00.000Z");
+      expect(result?.response_minutes).toBe(1);
     });
 
     it("returns recovering for VIP lead that responded after breach", async () => {

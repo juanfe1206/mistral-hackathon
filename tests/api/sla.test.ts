@@ -58,6 +58,7 @@ describe("GET /api/sla", () => {
       minutes_to_breach: null,
       minutes_over: 3,
       first_response_at: null,
+      response_minutes: null,
     });
     const request = new NextRequest(`http://localhost/api/sla?lead_id=${LEAD_ID}`);
     const response = await GET(request);
@@ -69,6 +70,7 @@ describe("GET /api/sla", () => {
       minutes_to_breach: null,
       minutes_over: 3,
       first_response_at: null,
+      response_minutes: null,
     });
     expect(mockGetLeadSlaStatus).toHaveBeenCalledWith(LEAD_ID, TENANT_ID);
   });
@@ -98,5 +100,25 @@ describe("GET /api/sla", () => {
     const json = await response.json();
     expect(json.error.code).toBe("FETCH_FAILED");
     expect(json.error.message).toContain("temporarily unavailable");
+  });
+
+  it("prefers x-tenant-id header over tenant_id query param", async () => {
+    const headerTenant = "33333333-3333-3333-8333-333333333333";
+    mockGetQueueSlaSummary.mockResolvedValue({
+      count_safe: 1,
+      count_warning: 0,
+      count_breach_risk: 0,
+      count_breached: 0,
+      count_recovering: 0,
+      count_n_a: 0,
+      total_tracked: 1,
+      sla_safe_percent: 100,
+    });
+    const request = new NextRequest(`http://localhost/api/sla?tenant_id=${TENANT_ID}`, {
+      headers: { "x-tenant-id": headerTenant },
+    });
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+    expect(mockGetQueueSlaSummary).toHaveBeenCalledWith(headerTenant);
   });
 });

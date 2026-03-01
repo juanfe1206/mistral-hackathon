@@ -27,9 +27,22 @@ describe("SLASafetyIndicator", () => {
         minutes_to_breach: 1,
         minutes_over: null,
         first_response_at: null,
+        response_minutes: null,
       };
       render(<LeadSlaIndicator slaStatus={sla} />);
       expect(screen.getByRole("status", { name: /SLA at breach risk.*1m to breach/ })).toBeInTheDocument();
+    });
+
+    it("shows response duration when lead responded in time", () => {
+      const sla: SlaStatusData = {
+        status: "safe",
+        minutes_to_breach: null,
+        minutes_over: null,
+        first_response_at: "2024-01-01T12:09:00.000Z",
+        response_minutes: 1,
+      };
+      render(<LeadSlaIndicator slaStatus={sla} />);
+      expect(screen.getByRole("status", { name: /SLA safe.*Responded in 1m/ })).toBeInTheDocument();
     });
   });
 
