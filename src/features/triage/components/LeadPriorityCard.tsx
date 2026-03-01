@@ -96,27 +96,32 @@ export function LeadPriorityCard({
   const showInlinePanel = expanded || selected;
   const leadDetailHref = detailHref ?? `/lead/${lead.id}`;
   const inlineActionsRegionId = `lead-inline-actions-${lead.id}`;
+  const isInteractive = variant === "compact";
 
   return (
     <Card
       component="article"
       aria-label={ariaLabel}
-      tabIndex={0}
-      aria-expanded={variant === "compact" ? showInlinePanel : undefined}
-      aria-controls={variant === "compact" ? inlineActionsRegionId : undefined}
-      onClick={() => setExpanded((prev) => !prev)}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
-          event.preventDefault();
-          setExpanded((prev) => !prev);
-        }
-      }}
+      tabIndex={isInteractive ? 0 : undefined}
+      aria-expanded={isInteractive ? showInlinePanel : undefined}
+      aria-controls={isInteractive ? inlineActionsRegionId : undefined}
+      onClick={isInteractive ? () => setExpanded((prev) => !prev) : undefined}
+      onKeyDown={
+        isInteractive
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+                event.preventDefault();
+                setExpanded((prev) => !prev);
+              }
+            }
+          : undefined
+      }
       sx={{
         border: "2px solid",
         borderColor,
         transition: "border-color 0.2s, box-shadow 0.2s",
-        cursor: "pointer",
-        "&:hover": { borderColor: theme.palette.primary.light },
+        cursor: isInteractive ? "pointer" : "default",
+        "&:hover": isInteractive ? { borderColor: theme.palette.primary.light } : undefined,
         "&:focus-within": {
           outline: `2px solid ${theme.palette.primary.main}`,
           outlineOffset: 2,

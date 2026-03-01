@@ -190,6 +190,9 @@ export default function TriagePage() {
     return (
       <Box sx={{ p: 3, maxWidth: 960, mx: "auto" }}>
         <Typography color="error">Error loading leads: {error}</Typography>
+        <Button variant="outlined" size="small" onClick={loadData} sx={{ mt: 1.5 }}>
+          Retry
+        </Button>
       </Box>
     );
   }

@@ -79,6 +79,7 @@ export function QueueFilterBar({
 
   const hasActiveFilters =
     filters.priority != null || filters.lifecycle != null || filters.source != null;
+  const activeFilterCount = [filters.priority, filters.lifecycle, filters.source].filter(Boolean).length;
 
   const handleSortChange = (e: SelectChangeEvent<QueueSortOption>) => {
     onSortChange(e.target.value as QueueSortOption);
@@ -212,7 +213,7 @@ export function QueueFilterBar({
           sx={{ minWidth: 44, minHeight: 44 }}
           disabled={loading}
         >
-          Filters
+          {activeFilterCount > 0 ? `Filters (${activeFilterCount})` : "Filters"}
         </Button>
         <Drawer
           anchor="bottom"
@@ -220,7 +221,26 @@ export function QueueFilterBar({
           onClose={() => setDrawerOpen(false)}
           PaperProps={{ sx: { borderTopLeftRadius: 12, borderTopRightRadius: 12 } }}
         >
-          <Box sx={{ p: 2 }}>{filterContent}</Box>
+          <Box sx={{ p: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 1,
+              }}
+            >
+              <Typography variant="subtitle2">Filters and sort</Typography>
+              <Button
+                onClick={() => setDrawerOpen(false)}
+                size="small"
+                sx={{ minWidth: 44, minHeight: 44 }}
+              >
+                Done
+              </Button>
+            </Box>
+            {filterContent}
+          </Box>
         </Drawer>
       </>
     );

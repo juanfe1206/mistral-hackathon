@@ -186,6 +186,7 @@ GPT-5 Codex
 - 2026-03-01: Follow-up fix applied after code review: triage now restores `sort` and filter state from URL query params, with validation of allowed values.
 - 2026-03-01: Added integration assertion for URL-param-based triage state restoration to prevent regressions in back-and-forth flow.
 - 2026-03-01: Documented concurrent branch changes outside Story 4.4 scope for file-list traceability.
+- 2026-03-01: Added end-to-end round-trip integration coverage for triage -> lead detail -> back to triage to validate restored filter/sort context.
 
 ### File List
 
@@ -214,3 +215,4 @@ GPT-5 Codex
 - 2026-03-01: Story created and set to `ready-for-dev`.
 - 2026-03-01: Story implemented and set to `review`.
 - 2026-03-01: Applied code-review follow-up fixes for triage context restoration and integration coverage; updated traceability notes for concurrent branch edits.
+- 2026-03-01: Added round-trip navigation integration test coverage to close code-review finding on triage context restoration behavior.
