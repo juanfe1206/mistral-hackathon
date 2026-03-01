@@ -31,6 +31,8 @@ interface QueueSlaIndicatorProps {
   summary: QueueSlaSummary | null;
   unavailable?: boolean;
   onRetry?: () => void;
+  /** Optional: when at-risk leads exist, fires on click (UX: "Clicking opens filtered list") */
+  onAtRiskClick?: () => void;
 }
 
 function getStatusConfig(status: SlaStatus) {
@@ -85,7 +87,7 @@ export function LeadSlaIndicator({ slaStatus, compact = false, unavailable = fal
   );
 }
 
-export function QueueSlaIndicator({ summary, unavailable = false, onRetry }: QueueSlaIndicatorProps) {
+export function QueueSlaIndicator({ summary, unavailable = false, onRetry, onAtRiskClick }: QueueSlaIndicatorProps) {
   if (unavailable) {
     return (
       <div role="alert" aria-live="polite" style={{ padding: "0.4rem 0.75rem", fontSize: "0.875rem", border: "1px solid rgba(200, 100, 0, 0.4)", borderRadius: 6, backgroundColor: "rgba(200, 100, 0, 0.08)" }}>
@@ -121,8 +123,40 @@ export function QueueSlaIndicator({ summary, unavailable = false, onRetry }: Que
     bgColor = "rgba(200, 100, 0, 0.2)";
     ariaLabel = atRisk + " leads at SLA risk";
   }
+  const baseStyle = {
+    fontSize: "0.875rem",
+    fontWeight: 600,
+    padding: "0.25rem 0.6rem",
+    borderRadius: 6,
+    backgroundColor: bgColor,
+    display: "inline-flex" as const,
+    alignItems: "center",
+    gap: "0.35rem",
+  };
+
+  if (atRisk > 0 && onAtRiskClick) {
+    return (
+      <button
+        type="button"
+        role="status"
+        aria-label={ariaLabel}
+        onClick={onAtRiskClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onAtRiskClick();
+          }
+        }}
+        style={{ ...baseStyle, border: "none", font: "inherit", cursor: "pointer" }}
+      >
+        <span aria-hidden="true">{icon}</span>
+        {label}
+      </button>
+    );
+  }
+
   return (
-    <span role="status" aria-label={ariaLabel} style={{ fontSize: "0.875rem", fontWeight: 600, padding: "0.25rem 0.6rem", borderRadius: 6, backgroundColor: bgColor, display: "inline-flex", alignItems: "center", gap: "0.35rem" }}>
+    <span role="status" aria-label={ariaLabel} style={baseStyle}>
       <span aria-hidden="true">{icon}</span>
       {label}
     </span>

@@ -1,6 +1,6 @@
 # Story 3.1: Show Urgent SLA Status in Queue and Lead Views
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -181,6 +181,7 @@ No project-context.md. Use PRD, architecture, epics, UX spec. UX: SLASafetyIndic
 
 - 2026-03-01: Story created via create-story workflow. Target: Urgent first-response SLA status at queue and lead level, SLASafetyIndicator, non-color cues (NFR13), fallback on unavailable.
 - 2026-03-01: Implementation complete. sla-service, GET /api/sla, SLA embedded in leads API, SLASafetyIndicator component, triage and lead detail pages updated, fallback handling, tests.
+- 2026-03-01: Code review fixes. HIGH: Added leads-detail test for SLA error fallback; aligned getQueueSlaSummary limit (100) with getLeadsWithSlaStatus. MEDIUM: QueueSlaIndicator onAtRiskClick prop for UX "click to filter"; component tests for SLA fallback.
 
 ---
 
@@ -202,18 +203,20 @@ Composer (dev-story workflow)
 - Triage: QueueSlaIndicator in header, LeadSlaIndicator compact on each card
 - Lead detail: LeadSlaIndicator in header with onRetry
 - Tests: sla-service (7), sla API (5), leads-queue and leads-detail updated with sla_status
+- Code review: getQueueSlaSummary default limit 100 (matches triage leads); QueueSlaIndicator onAtRiskClick; component tests for fallback UI
 
 ### File List
 
 - src/server/repositories/reply-draft-repository.ts (modified)
-- src/server/services/sla-service.ts (new)
+- src/server/services/sla-service.ts (modified)
 - src/app/api/sla/route.ts (new)
 - src/app/api/leads/route.ts (modified)
 - src/app/api/leads/[id]/route.ts (modified)
-- src/components/SLASafetyIndicator.tsx (new)
+- src/components/SLASafetyIndicator.tsx (modified)
 - src/app/(dashboard)/triage/page.tsx (modified)
 - src/app/(dashboard)/lead/[id]/page.tsx (modified)
 - tests/services/sla-service.test.ts (new)
 - tests/api/sla.test.ts (new)
 - tests/api/leads-queue.test.ts (modified)
 - tests/api/leads-detail.test.ts (modified)
+- tests/components/SLASafetyIndicator.test.tsx (new)

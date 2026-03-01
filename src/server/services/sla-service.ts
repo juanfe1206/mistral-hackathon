@@ -91,8 +91,15 @@ export async function getLeadSlaStatus(leadId: string, tenantId: string): Promis
   };
 }
 
-export async function getQueueSlaSummary(tenantId: string): Promise<QueueSlaSummary> {
-  const leads = await leadRepository.findLeadsByTenant(tenantId, { limit: 500 });
+/** Default limit matches getLeadsWithSlaStatus so triage header reflects visible leads. */
+const DEFAULT_QUEUE_LIMIT = 100;
+
+export async function getQueueSlaSummary(
+  tenantId: string,
+  options?: { limit?: number }
+): Promise<QueueSlaSummary> {
+  const limit = options?.limit ?? DEFAULT_QUEUE_LIMIT;
+  const leads = await leadRepository.findLeadsByTenant(tenantId, { limit });
   const leadIds = leads.map((l) => l.id);
   const firstResponseByLead = await replyDraftRepository.getEarliestSentAtByLeadIds(leadIds, tenantId);
 

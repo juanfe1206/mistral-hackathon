@@ -127,4 +127,30 @@ describe("GET /api/leads/[id]", () => {
     const json = await response.json();
     expect(json.error.code).toBe("NOT_FOUND");
   });
+
+  it("returns lead with sla_status null when SLA service throws (AC2 fallback)", async () => {
+    mockFindLeadById.mockResolvedValue({
+      id: LEAD_ID,
+      tenantId: TENANT_ID,
+      sourceChannel: "whatsapp",
+      sourceExternalId: "1",
+      sourceMetadata: {},
+      priority: "vip",
+      lifecycleState: "default",
+      createdAt: new Date("2024-01-01T00:00:00Z"),
+      classifications: [],
+      priorityOverrides: [],
+      riskPulses: [],
+    });
+    mockGetLeadSlaStatus.mockRejectedValue(new Error("DB connection refused"));
+    const request = new NextRequest(`http://localhost/api/leads/${LEAD_ID}`);
+    const response = await GET(request, {
+      params: Promise.resolve({ id: LEAD_ID }),
+    });
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    expect(json.data.sla_status).toBeNull();
+    expect(json.data.id).toBe(LEAD_ID);
+    expect(json.data.priority).toBe("vip");
+  });
 });
