@@ -1,26 +1,30 @@
 import Link from "next/link";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import Chip from "@mui/material/Chip";
 
 export default function Home() {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <main style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2rem", padding: "2rem" }}>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 600 }}>
-          Mistral Lead Ops
-        </h1>
-        <p>Lead operations platform for salon operators.</p>
-        <Link
-          href="/triage"
-          style={{
-            padding: "0.5rem 1rem",
-            backgroundColor: "var(--foreground)",
-            color: "var(--background)",
-            textDecoration: "none",
-            borderRadius: 6,
-          }}
-        >
-          Open Triage Queue
-        </Link>
+    <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <main>
+        <Stack spacing={3} alignItems="center" sx={{ p: 3 }}>
+          <Typography variant="h1" component="h1">
+            Mistral Lead Ops
+          </Typography>
+          <Typography variant="body1">Lead operations platform for salon operators.</Typography>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap justifyContent="center">
+            <Chip label="Success" color="success" size="small" />
+            <Chip label="Warning" color="warning" size="small" />
+            <Chip label="Error" color="error" size="small" />
+            <Chip label="Info" color="info" size="small" />
+          </Stack>
+          <Button component={Link} href="/triage" variant="contained" color="primary">
+            Open Triage Queue
+          </Button>
+        </Stack>
       </main>
-    </div>
+    </Box>
   );
 }

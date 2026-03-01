@@ -6,9 +6,11 @@ const TENANT_ID = "22222222-2222-2222-8222-222222222222";
 
 const mockGetLeadsWithSlaStatus = vi.fn();
 const mockGetOrCreateDefaultTenant = vi.fn();
+const mockClassifyAndPersistForLead = vi.fn();
 
 vi.mock("@/server/services/lead-service", () => ({
   getOrCreateDefaultTenant: () => mockGetOrCreateDefaultTenant(),
+  classifyAndPersistForLead: (...args: unknown[]) => mockClassifyAndPersistForLead(...args),
 }));
 
 vi.mock("@/server/services/sla-service", () => ({
@@ -19,6 +21,7 @@ describe("GET /api/leads (ranked queue)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetOrCreateDefaultTenant.mockResolvedValue(TENANT_ID);
+    mockClassifyAndPersistForLead.mockResolvedValue(undefined);
   });
 
   it("returns leads with priority and sla_status in response (vip before high before low)", async () => {
@@ -53,7 +56,7 @@ describe("GET /api/leads (ranked queue)", () => {
       priority: "low" as const,
       lifecycleState: "default" as const,
       createdAt: new Date("2024-01-03T00:00:00Z"),
-      classifications: [],
+      classifications: [{ reasonTags: [] }],
     };
     mockGetLeadsWithSlaStatus.mockResolvedValue([
       { lead: lead1, sla_status: { status: "safe" as const, minutes_to_breach: null, minutes_over: null, first_response_at: null } },
