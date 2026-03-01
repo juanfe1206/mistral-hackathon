@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
             id: p.lead.id,
             source_channel: p.lead.sourceChannel,
             source_external_id: p.lead.sourceExternalId,
+            source_metadata: p.lead.sourceMetadata,
             priority: p.lead.priority,
             lifecycle_state: p.lead.lifecycleState,
           }
