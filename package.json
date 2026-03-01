@@ -13,10 +13,12 @@
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
     "backfill:interactions": "tsx scripts/backfill-interactions.ts",
+    "mistral:spike": "tsx scripts/mistral-classify-spike.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@mistralai/mistralai": "^1.14.1",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
     "dotenv": "^17.3.1",
