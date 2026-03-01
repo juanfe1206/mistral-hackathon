@@ -38,6 +38,21 @@ export async function GET(
       );
     }
 
+    // Auto-classify if lead has no classification yet (e.g. demo seed, or classification failed on ingest)
+    const hasClassification = (lead.classifications?.length ?? 0) > 0;
+    if (!hasClassification) {
+      try {
+        await leadService.classifyAndPersistForLead(id, tenantId);
+        lead = await leadService.findLeadById(id, tenantId) ?? lead;
+      } catch (classifyErr) {
+        console.error(
+          `[leads/${id}] Auto-classification failed:`,
+          classifyErr instanceof Error ? classifyErr.message : String(classifyErr)
+        );
+        // Continue - lead still returned, UI can retry via Reclassify
+      }
+    }
+
     // Run at-risk detection on lead detail load (Task 4)
     try {
       const detectResult = await riskService.detectAndFlagAtRisk(id, tenantId, {

@@ -291,8 +291,30 @@ export default function LeadDetailPage() {
 
   const meta = lead.source_metadata ?? {};
 
+  const hasClassification = (lead.reason_tags?.length ?? 0) > 0;
+  const showMistralBanner = !hasClassification || (lead.risk_pulses?.length && !draft);
+
   return (
     <div style={{ padding: "1.5rem", maxWidth: 640, margin: "0 auto" }}>
+      {showMistralBanner && (
+        <div
+          style={{
+            padding: "0.75rem 1rem",
+            marginBottom: "1rem",
+            background: "rgba(90, 90, 140, 0.15)",
+            border: "1px solid rgba(90, 90, 140, 0.4)",
+            borderRadius: 8,
+            fontSize: "0.85rem",
+          }}
+        >
+          <strong>Mistral API demo:</strong>{" "}
+          {!hasClassification
+            ? "Click Reclassify to classify this lead with Mistral AI."
+            : lead.risk_pulses?.length && !draft
+              ? "Click Generate draft to create a recovery message with Mistral AI."
+              : null}
+        </div>
+      )}
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>
         <Link
           href="/triage"
@@ -586,7 +608,7 @@ export default function LeadDetailPage() {
                   cursor: generating ? "not-allowed" : "pointer",
                 }}
               >
-                {generating ? "Generating…" : "Generate"}
+                {generating ? "Generating…" : "Generate draft"}
               </button>
               {replyError && replyErrorSource === "generate" && (
                 <button

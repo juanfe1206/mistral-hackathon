@@ -19,7 +19,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const leadsWithSla = await slaService.getLeadsWithSlaStatus(tenantId, { limit: 100 });
+    let leadsWithSla = await slaService.getLeadsWithSlaStatus(tenantId, { limit: 100 });
+
+    // Auto-classify unclassified leads (e.g. demo seed) so queue shows priority and reason tags
+    const unclassified = leadsWithSla.filter(({ lead }) => (lead.classifications?.length ?? 0) === 0);
+    if (unclassified.length > 0) {
+      await Promise.all(
+        unclassified.map(({ lead }) =>
+          leadService.classifyAndPersistForLead(lead.id, tenantId).catch((err) => {
+            console.error(`[leads] Auto-classify failed for ${lead.id}:`, err instanceof Error ? err.message : String(err));
+          })
+        )
+      );
+      leadsWithSla = await slaService.getLeadsWithSlaStatus(tenantId, { limit: 100 });
+    }
+
     return NextResponse.json(
       createSuccessResponse(
         leadsWithSla.map(({ lead: l, sla_status }) => {

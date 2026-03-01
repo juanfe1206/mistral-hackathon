@@ -123,6 +123,22 @@ export default function TriagePage() {
       <p style={{ color: "var(--foreground)", opacity: 0.8, marginBottom: "1rem" }}>
         Inbound leads from WhatsApp
       </p>
+      {leads.length > 0 && leads.every((l) => !l.reason_tags?.length) && (
+        <div
+          style={{
+            padding: "0.75rem 1rem",
+            marginBottom: "1rem",
+            background: "rgba(90, 90, 140, 0.15)",
+            border: "1px solid rgba(90, 90, 140, 0.4)",
+            borderRadius: 8,
+            fontSize: "0.85rem",
+          }}
+        >
+          <strong>Mistral API demo:</strong> Leads are unclassified. Open any lead → click{" "}
+          <strong>Reclassify</strong> to classify with Mistral AI. For at-risk leads, click{" "}
+          <strong>Generate draft</strong> to create a recovery message.
+        </div>
+      )}
       {failures.length > 0 && (
         <div
           style={{
