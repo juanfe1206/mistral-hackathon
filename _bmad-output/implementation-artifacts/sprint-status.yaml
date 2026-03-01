@@ -57,3 +57,12 @@ development_status:
   3-1-show-urgent-sla-status-in-queue-and-lead-views: done
   3-2-display-kpi-summary-panel-for-mvp-outcomes: done
   epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-0-apply-design-system-foundation: backlog
+  4-1-implement-phase-1-journey-components: backlog
+  4-2-implement-phase-2-risk-recovery-components: backlog
+  4-3-implement-phase-3-governance-component: backlog
+  4-4-align-triage-and-at-risk-flows-to-spec: backlog
+  4-5-responsive-and-accessibility-validation: backlog
+  epic-4-retrospective: optional
