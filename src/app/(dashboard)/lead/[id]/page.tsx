@@ -64,6 +64,8 @@ export default function LeadDetailPage() {
   const [sending, setSending] = useState(false);
   const [tone, setTone] = useState<ComposerTone>("warm");
   const [lastSendSuccess, setLastSendSuccess] = useState(false);
+  const [lastGeneratedDraft, setLastGeneratedDraft] = useState("");
+  const [draftEdited, setDraftEdited] = useState(false);
 
   const loadData = async () => {
     if (!id) return;
@@ -115,6 +117,8 @@ export default function LeadDetailPage() {
     setApproved(false);
     setReplyError(null);
     setLastSendSuccess(false);
+    setLastGeneratedDraft("");
+    setDraftEdited(false);
   }, [id]);
 
   useEffect(() => {
@@ -186,6 +190,8 @@ export default function LeadDetailPage() {
       const json = await res.json();
       if (res.ok && json.data?.draft) {
         setDraft(json.data.draft);
+        setLastGeneratedDraft(json.data.draft);
+        setDraftEdited(false);
         setApproved(false);
         setLastSendSuccess(false);
       } else {
@@ -211,6 +217,8 @@ export default function LeadDetailPage() {
       const json = await res.json();
       if (res.ok) {
         setApproved(true);
+        setLastGeneratedDraft(draft);
+        setDraftEdited(false);
         setLastSendSuccess(false);
       } else {
         setReplyError(json.error?.message ?? "Approval failed");
@@ -236,6 +244,8 @@ export default function LeadDetailPage() {
       const json = await res.json();
       if (res.ok) {
         setDraft("");
+        setLastGeneratedDraft("");
+        setDraftEdited(false);
         setApproved(false);
         setLastSendSuccess(true);
         loadData();
@@ -316,7 +326,9 @@ export default function LeadDetailPage() {
       ? "sent"
       : draft.trim().length === 0
         ? "drafting"
-        : needsApproval && !approved
+        : draftEdited
+          ? "edited"
+          : needsApproval && !approved
           ? "pending-approval"
           : "generated";
 
@@ -555,8 +567,13 @@ export default function LeadDetailPage() {
               sending={sending}
               errorMessage={replyError}
               onDraftChange={(value) => {
+                const normalizedValue = value.trim();
                 setDraft(value);
                 setLastSendSuccess(false);
+                if (approved && value !== draft) {
+                  setApproved(false);
+                }
+                setDraftEdited(lastGeneratedDraft.trim().length > 0 && normalizedValue !== lastGeneratedDraft.trim());
               }}
               onGenerate={handleGenerateDraft}
               onApprove={handleApprove}

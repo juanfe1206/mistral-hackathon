@@ -156,6 +156,7 @@ describe("approval-service", () => {
         leadId: LEAD_ID,
         tenantId: TENANT_ID,
         status: "approved",
+        draftText: "Hi",
       });
       mockUpdateDraftStatus.mockResolvedValue({ id: "draft-approved" });
 
@@ -184,6 +185,31 @@ describe("approval-service", () => {
           }),
         })
       );
+    });
+
+    it("throws when vip/high send text differs from latest approved draft", async () => {
+      mockFindLeadById.mockResolvedValue({
+        id: LEAD_ID,
+        tenantId: TENANT_ID,
+        priority: "high",
+      });
+      mockFindLatestApprovedDraftForLead.mockResolvedValue({
+        id: "draft-approved",
+        leadId: LEAD_ID,
+        tenantId: TENANT_ID,
+        status: "approved",
+        draftText: "Approved version",
+      });
+
+      await expect(
+        approvalService.approveOrSendReply({
+          leadId: LEAD_ID,
+          tenantId: TENANT_ID,
+          draftText: "Edited version",
+          action: "send",
+        })
+      ).rejects.toThrow("Approve the draft before sending when draft text changes");
+      expect(mockUpdateDraftStatus).not.toHaveBeenCalled();
     });
   });
 });

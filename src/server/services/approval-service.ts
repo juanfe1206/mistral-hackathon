@@ -82,6 +82,11 @@ export async function approveOrSendReply(input: ApproveReplyInput): Promise<Appr
         `Lead ${leadId} is VIP/high-risk. Approve the draft before sending.`
       );
     }
+    if (approvedDraft.draftText.trim() !== draftText.trim()) {
+      throw new Error(
+        `Lead ${leadId} is VIP/high-risk. Approve the draft before sending when draft text changes.`
+      );
+    }
     await replyDraftRepository.updateDraftStatus(
       approvedDraft.id,
       tenantId,

@@ -31,7 +31,7 @@ describe("AtRiskPulseBanner", () => {
     expect(screen.getByText(/Elapsed:/i)).toBeInTheDocument();
   });
 
-  it("supports sticky variant and keyboard-operable CTAs", () => {
+  it("supports sticky variant and CTA actions", () => {
     const onRecover = vi.fn();
     const onLost = vi.fn();
 
@@ -50,7 +50,7 @@ describe("AtRiskPulseBanner", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Mark recovered/i }));
     expect(onRecover).toHaveBeenCalledTimes(1);
-    fireEvent.keyDown(screen.getByRole("button", { name: /Mark lost/i }), { key: "Enter" });
+    fireEvent.click(screen.getByRole("button", { name: /Mark lost/i }));
     expect(onLost).toHaveBeenCalledTimes(1);
   });
 

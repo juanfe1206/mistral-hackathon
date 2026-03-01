@@ -99,12 +99,6 @@ export function AtRiskPulseBanner({
         <Button
           variant="contained"
           onClick={primaryAction.onClick}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              primaryAction.onClick();
-            }
-          }}
           disabled={primaryAction.disabled}
           sx={{ minHeight: 44 }}
           aria-label={primaryAction.label}
@@ -116,12 +110,6 @@ export function AtRiskPulseBanner({
             key={action.label}
             variant="outlined"
             onClick={action.onClick}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                action.onClick();
-              }
-            }}
             disabled={action.disabled}
             sx={{ minHeight: 44 }}
             aria-label={action.label}

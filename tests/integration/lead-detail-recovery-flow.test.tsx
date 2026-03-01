@@ -26,6 +26,7 @@ function setupFetchMock({
   priority: "vip" | "high" | "low";
   riskPulses: Array<{ id: string; reason: string; detected_at: string; status: string }>;
 }) {
+  let latestApprovedDraft: string | null = null;
   const leadPayload = {
     data: {
       id: LEAD_ID,
@@ -56,6 +57,23 @@ function setupFetchMock({
     }
     if (url.endsWith(`/api/leads/${LEAD_ID}/approve-reply`)) {
       const body = init?.body ? JSON.parse(String(init.body)) : {};
+      if (body.action === "approve") {
+        latestApprovedDraft = body.draft_text;
+      }
+      if (
+        body.action === "send" &&
+        (priority === "vip" || priority === "high") &&
+        (!latestApprovedDraft || latestApprovedDraft !== body.draft_text)
+      ) {
+        return jsonResponse(
+          {
+            error: {
+              message: "Lead is VIP/high-risk. Approve the draft before sending.",
+            },
+          },
+          false
+        );
+      }
       return jsonResponse({
         data: {
           status: body.action === "approve" ? "approved" : "sent",
@@ -151,6 +169,38 @@ describe("lead-detail recovery flow integration", () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Current status: Sent/i)).toBeInTheDocument();
+    });
+  });
+
+  it("requires re-approval when a VIP/high approved draft is edited", async () => {
+    setupFetchMock({ priority: "high", riskPulses: [] });
+
+    render(<LeadDetailPage />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /Generate draft/i })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /Generate draft/i }));
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /Approve draft/i })).toBeEnabled();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /Approve draft/i }));
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /Send reply/i })).toBeEnabled();
+    });
+
+    fireEvent.change(screen.getByRole("textbox", { name: /Reply draft/i }), {
+      target: { value: "Edited after approval" },
+    });
+
+    expect(screen.getByText(/Current status: Edited/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Send reply/i })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: /Approve draft/i }));
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /Send reply/i })).toBeEnabled();
     });
   });
 });
