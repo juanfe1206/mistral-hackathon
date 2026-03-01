@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Tenant {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  leads     Lead[]
+
+  @@map("tenants")
+}
+
+model Lead {
+  id               String   @id @default(uuid()) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  sourceChannel    String   @map("source_channel")
+  sourceExternalId String   @map("source_external_id")
+  sourceMetadata   Json     @map("source_metadata")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId], name: "idx_leads_tenant_id")
+  @@map("leads")
+}
+
+model IngestionFailure {
+  id        String   @id @default(uuid()) @db.Uuid
+  errorCode String   @map("error_code")
+  message   String
+  details   Json?   @db.JsonB
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt], name: "idx_ingestion_failures_created_at")
+  @@map("ingestion_failures")
+}

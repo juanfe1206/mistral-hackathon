@@ -19,7 +19,26 @@ Lead operations platform built with Next.js.
    Copy-Item .env.example .env.local
    ```
 
-2. Edit `.env.local` and add any required variables as they are introduced in later stories. The baseline setup has no required env vars.
+2. Edit `.env.local` and set `DATABASE_URL` to your PostgreSQL connection string. For MVP without real data, the `.env.example` already includes mock values for `WHATSAPP_VERIFY_TOKEN` and `WHATSAPP_APP_SECRET`.
+
+## Database & Mock Data (MVP)
+
+If you have no real WhatsApp data, seed the database with mock leads:
+
+```bash
+# 1. Run migrations (requires PostgreSQL running)
+pnpm db:migrate
+
+# 2. Seed mock leads for demo
+pnpm db:seed
+
+# 3. Start dev server
+pnpm dev
+```
+
+Then open [http://localhost:3000/triage](http://localhost:3000/triage) to see the triage queue with sample leads.
+
+**No PostgreSQL?** Use a free tier: [Neon](https://neon.tech), [Supabase](https://supabase.com), or [Railway](https://railway.app). Copy the connection string to `DATABASE_URL`.
 
 ## Development
 
@@ -35,12 +54,14 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Scripts
 
-| Script       | Description                |
-| ------------ | -------------------------- |
-| `pnpm dev`   | Start development server   |
-| `pnpm build` | Create production build    |
-| `pnpm start` | Start production server    |
-| `pnpm lint`  | Run ESLint                 |
+| Script         | Description                    |
+| -------------- | ------------------------------ |
+| `pnpm dev`     | Start development server       |
+| `pnpm build`   | Create production build        |
+| `pnpm start`   | Start production server        |
+| `pnpm lint`    | Run ESLint                     |
+| `pnpm db:migrate` | Run database migrations     |
+| `pnpm db:seed`   | Seed mock leads (for MVP demo) |
 
 ## Project Structure
 

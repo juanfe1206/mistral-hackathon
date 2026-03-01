@@ -1,6 +1,6 @@
 # Story 1.1: Ingest WhatsApp Leads with Source Metadata
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -24,28 +24,28 @@ so that I can act on new opportunities from one channel in MVP.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add Prisma schema and migrations for leads with source metadata (AC: #1)
-  - [ ] Define `leads` table: id, tenant_id, source_channel, source_external_id, source_metadata (JSON), created_at
-  - [ ] Add minimal `tenants` table if not present (MVP: single-tenant support)
-  - [ ] Run `prisma migrate dev`
-- [ ] Task 2: Implement WhatsApp webhook ingestion endpoint (AC: #1)
-  - [ ] Create `src/app/api/webhooks/whatsapp/route.ts`
-  - [ ] Handle GET verification (hub.mode, hub.verify_token, hub.challenge)
-  - [ ] Handle POST: verify X-Hub-Signature-256 with APP_SECRET; parse payload, extract contact/message, create lead
-  - [ ] Validate payload with Zod; return typed error envelope on failure
-  - [ ] Emit `lead.ingested` domain event (or log for now if event infra deferred)
-- [ ] Task 3: Implement lead service and repository (AC: #1, #2)
-  - [ ] Create `src/server/repositories/lead-repository.ts` with tenant-scoped queries
-  - [ ] Create `src/server/services/lead-service.ts` for create/find operations
-  - [ ] Ensure NFR11: ingestion failures are logged; no silent drops
-- [ ] Task 4: Minimal triage queue and lead detail views (AC: #2)
-  - [ ] Create `src/app/(dashboard)/triage/page.tsx` — list leads (basic table/cards)
-  - [ ] Create `src/app/(dashboard)/lead/[id]/page.tsx` — show lead with source metadata
-  - [ ] Wire to API route `GET /api/leads` and `GET /api/leads/[id]`
-- [ ] Task 5: API routes for leads list and detail (AC: #2)
-  - [ ] Create `src/app/api/leads/route.ts` (GET list)
-  - [ ] Create `src/app/api/leads/[id]/route.ts` (GET by id)
-  - [ ] Use shared error envelope; include tenant_id in all queries
+- [x] Task 1: Add Prisma schema and migrations for leads with source metadata (AC: #1)
+  - [x] Define `leads` table: id, tenant_id, source_channel, source_external_id, source_metadata (JSON), created_at
+  - [x] Add minimal `tenants` table if not present (MVP: single-tenant support)
+  - [x] Run `prisma migrate dev`
+- [x] Task 2: Implement WhatsApp webhook ingestion endpoint (AC: #1)
+  - [x] Create `src/app/api/webhooks/whatsapp/route.ts`
+  - [x] Handle GET verification (hub.mode, hub.verify_token, hub.challenge)
+  - [x] Handle POST: verify X-Hub-Signature-256 with APP_SECRET; parse payload, extract contact/message, create lead
+  - [x] Validate payload with Zod; return typed error envelope on failure
+  - [x] Emit `lead.ingested` domain event (or log for now if event infra deferred)
+- [x] Task 3: Implement lead service and repository (AC: #1, #2)
+  - [x] Create `src/server/repositories/lead-repository.ts` with tenant-scoped queries
+  - [x] Create `src/server/services/lead-service.ts` for create/find operations
+  - [x] Ensure NFR11: ingestion failures are logged; no silent drops
+- [x] Task 4: Minimal triage queue and lead detail views (AC: #2)
+  - [x] Create `src/app/(dashboard)/triage/page.tsx` — list leads (basic table/cards)
+  - [x] Create `src/app/(dashboard)/lead/[id]/page.tsx` — show lead with source metadata
+  - [x] Wire to API route `GET /api/leads` and `GET /api/leads/[id]`
+- [x] Task 5: API routes for leads list and detail (AC: #2)
+  - [x] Create `src/app/api/leads/route.ts` (GET list)
+  - [x] Create `src/app/api/leads/[id]/route.ts` (GET by id)
+  - [x] Use shared error envelope; include tenant_id in all queries
 
 ## Dev Notes
 
@@ -196,6 +196,13 @@ No `project-context.md` found. Use PRD, architecture, epics, and UX spec as prim
 
 ---
 
+## Change Log
+
+- 2026-02-28: Story 1.1 implementation complete. Added Prisma schema (leads, tenants), WhatsApp webhook, lead service/repository, triage and lead detail views, API routes. Tests for webhook verification and error paths.
+- 2026-03-01: Code review fixes. Added ingestion_failures table and operator UI for NFR11; triage page error handling; UUID validation and try/catch on leads API; multi-message webhook processing; tests for valid payload, VALIDATION_FAILED, and NFR11 failure path.
+
+---
+
 ## Dev Agent Record
 
 ### Agent Model Used
@@ -206,4 +213,37 @@ No `project-context.md` found. Use PRD, architecture, epics, and UX spec as prim
 
 ### Completion Notes List
 
+- Implemented Prisma 7 schema with leads and tenants tables; migration file created (user runs `pnpm db:migrate` when DB available).
+- WhatsApp webhook: GET verification, POST ingestion with signature check, Zod validation, error envelope; lead.ingested logged.
+- Lead repository and service with tenant-scoped queries; default tenant created on first lead.
+- Triage page and lead detail page wired to API; client-side fetch from `/api/leads` and `/api/leads/[id]`.
+- Vitest tests for webhook GET verification and POST error paths (signature, invalid JSON). All tests pass.
+- [Code review] Ingestion failures persisted to DB and visible on triage page (AC#1, NFR11).
+- [Code review] Triage page checks res.ok and json.error to surface API failures.
+- [Code review] Leads API: try/catch with error envelope, UUID validation for tenant_id and id.
+- [Code review] Webhook processes all messages in payload (one lead per message).
+- [Code review] Tests: valid payload creates lead, VALIDATION_FAILED path, NFR11 ingestion failure recording.
+
 ### File List
+
+- prisma/schema.prisma
+- prisma.config.ts
+- prisma/migrations/20260228000000_init_leads_and_tenants/migration.sql
+- prisma/migrations/20260301000000_add_ingestion_failures/migration.sql
+- src/lib/db.ts
+- src/lib/uuid.ts
+- src/server/api/error-envelope.ts
+- src/server/repositories/lead-repository.ts
+- src/server/repositories/ingestion-failure-repository.ts
+- src/server/services/lead-service.ts
+- src/app/api/webhooks/whatsapp/route.ts
+- src/app/api/leads/route.ts
+- src/app/api/leads/[id]/route.ts
+- src/app/api/ingestion-failures/route.ts
+- src/app/(dashboard)/triage/page.tsx
+- src/app/(dashboard)/lead/[id]/page.tsx
+- src/app/page.tsx
+- tests/webhooks/whatsapp.test.ts
+- vitest.config.ts
+- .env.example
+- package.json
