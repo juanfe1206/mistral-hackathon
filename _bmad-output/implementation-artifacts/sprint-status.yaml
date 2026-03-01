@@ -60,7 +60,7 @@ development_status:
 
   epic-4: in-progress
   4-0-apply-design-system-foundation: done
-  4-1-implement-phase-1-journey-components: backlog
+  4-1-implement-phase-1-journey-components: done
   4-2-implement-phase-2-risk-recovery-components: backlog
   4-3-implement-phase-3-governance-component: backlog
   4-4-align-triage-and-at-risk-flows-to-spec: backlog

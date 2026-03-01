@@ -1,12 +1,19 @@
 "use client";
 
+import { useTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+
 export type SlaStatus = "safe" | "warning" | "breach-risk" | "breached" | "recovering" | "n_a";
+
+export type SlaTrend = "up" | "down" | "stable";
 
 export interface SlaStatusData {
   status: SlaStatus;
   minutes_to_breach: number | null;
   minutes_over: number | null;
   first_response_at: string | null;
+  /** Optional: trend for status change; when available, show arrow (↑/↓/−) per UX spec */
+  trend?: SlaTrend;
 }
 
 export interface QueueSlaSummary {
@@ -20,9 +27,13 @@ export interface QueueSlaSummary {
   sla_safe_percent: number | null;
 }
 
+export type SlaIndicatorVariant = "inline" | "summary" | "compact";
+
 interface LeadSlaIndicatorProps {
   slaStatus: SlaStatusData | null;
+  /** @deprecated Use variant="compact" instead */
   compact?: boolean;
+  variant?: SlaIndicatorVariant;
   unavailable?: boolean;
   onRetry?: () => void;
 }
@@ -33,22 +44,30 @@ interface QueueSlaIndicatorProps {
   onRetry?: () => void;
   /** Optional: when at-risk leads exist, fires on click (UX: "Clicking opens filtered list") */
   onAtRiskClick?: () => void;
+  variant?: SlaIndicatorVariant;
 }
 
-function getStatusConfig(status: SlaStatus) {
+function getTrendSymbol(trend?: SlaTrend): string {
+  if (!trend) return "";
+  if (trend === "up") return "↑";
+  if (trend === "down") return "↓";
+  return "−";
+}
+
+function getStatusConfig(status: SlaStatus, palette: { success: { main: string }; warning: { main: string }; error: { main: string }; grey: { [k: number]: string } }) {
   switch (status) {
     case "safe":
-      return { icon: "+", label: "SLA safe", bgColor: "rgba(0, 128, 0, 0.15)", ariaLabel: "SLA safe" };
+      return { icon: "✓", label: "SLA safe", color: palette.success.main, ariaLabel: "SLA safe" };
     case "warning":
-      return { icon: "!", label: "Approaching breach", bgColor: "rgba(200, 160, 0, 0.2)", ariaLabel: "SLA warning" };
+      return { icon: "!", label: "Approaching breach", color: palette.warning.main, ariaLabel: "SLA warning" };
     case "breach-risk":
-      return { icon: "!", label: "Breach risk", bgColor: "rgba(220, 100, 0, 0.25)", ariaLabel: "SLA at breach risk" };
+      return { icon: "!", label: "Breach risk", color: palette.warning.main, ariaLabel: "SLA at breach risk" };
     case "breached":
-      return { icon: "X", label: "Breached", bgColor: "rgba(220, 50, 50, 0.2)", ariaLabel: "SLA breached" };
+      return { icon: "✕", label: "Breached", color: palette.error.main, ariaLabel: "SLA breached" };
     case "recovering":
-      return { icon: "~", label: "Recovered late", bgColor: "rgba(128, 128, 128, 0.2)", ariaLabel: "Responded after SLA breach" };
+      return { icon: "↻", label: "Recovered late", color: palette.grey[600] ?? "#757575", ariaLabel: "Responded after SLA breach" };
     default:
-      return { icon: "-", label: "N/A", bgColor: "rgba(128, 128, 128, 0.12)", ariaLabel: "SLA not applicable" };
+      return { icon: "−", label: "N/A", color: palette.grey[500] ?? "#9e9e9e", ariaLabel: "SLA not applicable" };
   }
 }
 
@@ -60,44 +79,105 @@ function getActionableLabel(sla: SlaStatusData): string {
   if (sla.status === "breach-risk" && sla.minutes_to_breach != null) return `${sla.minutes_to_breach}m to breach`;
   if (sla.status === "breached" && sla.minutes_over != null) return `Breached ${sla.minutes_over}m ago`;
   if (sla.status === "recovering" && sla.minutes_over != null) return `Responded ${sla.minutes_over}m late`;
-  return getStatusConfig(sla.status).label;
+  return getStatusConfig(sla.status, { success: { main: "#2e7d32" }, warning: { main: "#ed6c02" }, error: { main: "#d32f2f" }, grey: { 500: "#9e9e9e", 600: "#757575" } }).label;
 }
 
-export function LeadSlaIndicator({ slaStatus, compact = false, unavailable = false, onRetry }: LeadSlaIndicatorProps) {
+export function LeadSlaIndicator({ slaStatus, compact, variant = "inline", unavailable = false, onRetry }: LeadSlaIndicatorProps) {
+  const theme = useTheme();
+  const palette = theme.palette as { success: { main: string }; warning: { main: string }; error: { main: string }; grey?: { [k: number]: string } };
+  const isCompact = variant === "compact" || compact;
+
   if (unavailable) {
     return (
-      <span role="status" aria-label="SLA status temporarily unavailable" style={{ fontSize: compact ? "0.65rem" : "0.75rem", padding: compact ? "0.1rem 0.35rem" : "0.2rem 0.5rem", borderRadius: 4, backgroundColor: "rgba(128, 128, 128, 0.1)", display: "inline-flex", alignItems: "center", gap: "0.25rem" }}>
+      <Box
+        component="span"
+        role="status"
+        aria-label="SLA status temporarily unavailable"
+        sx={{
+          fontSize: isCompact ? "0.65rem" : "0.75rem",
+          padding: isCompact ? "0.1rem 0.35rem" : "0.2rem 0.5rem",
+          borderRadius: 1,
+          backgroundColor: `${palette.grey?.[400] ?? "#bdbdbd"}20`,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "0.25rem",
+        }}
+      >
         SLA -
-        {onRetry && !compact && (
-          <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRetry(); }} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onRetry(); } }} aria-label="Retry loading SLA" style={{ padding: "0.1rem 0.35rem", fontSize: "0.7rem", border: "1px solid rgba(128,128,128,0.4)", borderRadius: 4, background: "var(--background)", color: "var(--foreground)", cursor: "pointer" }}>
+        {onRetry && !isCompact && (
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRetry(); }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onRetry(); } }}
+            aria-label="Retry loading SLA"
+            style={{ padding: "0.1rem 0.35rem", fontSize: "0.7rem", border: "1px solid rgba(128,128,128,0.4)", borderRadius: 4, background: "var(--background)", color: "var(--foreground)", cursor: "pointer" }}
+          >
             Retry
           </button>
         )}
-      </span>
+      </Box>
     );
   }
   if (!slaStatus) return null;
-  const cfg = getStatusConfig(slaStatus.status);
+  const cfg = getStatusConfig(slaStatus.status, palette);
   const label = getActionableLabel(slaStatus);
+  const trendSym = getTrendSymbol(slaStatus.trend);
+
   return (
-    <span role="status" aria-label={cfg.ariaLabel + (label ? ": " + label : "")} style={{ fontSize: compact ? "0.65rem" : "0.75rem", fontWeight: 600, padding: compact ? "0.1rem 0.35rem" : "0.2rem 0.5rem", borderRadius: 4, backgroundColor: cfg.bgColor, display: "inline-flex", alignItems: "center", gap: "0.25rem" }}>
+    <Box
+      component="span"
+      role="status"
+      aria-label={cfg.ariaLabel + (label ? ": " + label : "") + (trendSym ? " trend " + trendSym : "")}
+      sx={{
+        fontSize: variant === "compact" ? "0.65rem" : variant === "summary" ? "0.875rem" : "0.75rem",
+        fontWeight: 600,
+        padding: variant === "compact" ? "0.1rem 0.35rem" : variant === "summary" ? "0.5rem 0.75rem" : "0.2rem 0.5rem",
+        borderRadius: variant === "summary" ? 2 : 1,
+        backgroundColor: `${cfg.color}20`,
+        color: cfg.color,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "0.25rem",
+        border: variant === "summary" ? `2px solid ${cfg.color}40` : "none",
+      }}
+    >
       <span aria-hidden="true">{cfg.icon}</span>
+      {trendSym && <span aria-hidden="true">{trendSym}</span>}
       {label}
-    </span>
+    </Box>
   );
 }
 
-export function QueueSlaIndicator({ summary, unavailable = false, onRetry, onAtRiskClick }: QueueSlaIndicatorProps) {
+export function QueueSlaIndicator({ summary, unavailable = false, onRetry, onAtRiskClick, variant = "inline" }: QueueSlaIndicatorProps) {
+  const theme = useTheme();
+  const palette = theme.palette;
+
   if (unavailable) {
     return (
-      <div role="alert" aria-live="polite" style={{ padding: "0.4rem 0.75rem", fontSize: "0.875rem", border: "1px solid rgba(200, 100, 0, 0.4)", borderRadius: 6, backgroundColor: "rgba(200, 100, 0, 0.08)" }}>
+      <Box
+        role="alert"
+        aria-live="polite"
+        sx={{
+          padding: "0.4rem 0.75rem",
+          fontSize: "0.875rem",
+          border: (t) => `1px solid ${t.palette.warning.main}66`,
+          borderRadius: 1.5,
+          backgroundColor: (t) => `${t.palette.warning.main}14`,
+        }}
+      >
         <span aria-hidden="true">!</span> SLA temporarily unavailable
         {onRetry && (
-          <button type="button" onClick={onRetry} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onRetry(); } }} aria-label="Retry loading SLA" style={{ marginLeft: "0.5rem", padding: "0.2rem 0.5rem", fontSize: "0.75rem", border: "1px solid rgba(128,128,128,0.4)", borderRadius: 4, background: "var(--background)", color: "var(--foreground)", cursor: "pointer" }}>
+          <button
+            type="button"
+            onClick={onRetry}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onRetry(); } }}
+            aria-label="Retry loading SLA"
+            style={{ marginLeft: "0.5rem", padding: "0.2rem 0.5rem", fontSize: "0.75rem", border: "1px solid rgba(128,128,128,0.4)", borderRadius: 4, background: "var(--background)", color: "var(--foreground)", cursor: "pointer" }}
+          >
             Retry
           </button>
         )}
-      </div>
+      </Box>
     );
   }
   if (!summary) return null;
@@ -105,38 +185,41 @@ export function QueueSlaIndicator({ summary, unavailable = false, onRetry, onAtR
   const atRisk = count_breached + count_breach_risk + count_warning;
   let label: string;
   let icon: string;
-  let bgColor: string;
+  let color: string;
   let ariaLabel: string;
   if (total_tracked === 0) {
     label = "No SLA leads";
-    icon = "-";
-    bgColor = "rgba(128, 128, 128, 0.12)";
+    icon = "−";
+    color = palette.grey?.[500] ?? "#9e9e9e";
     ariaLabel = "No VIP or high-priority leads to track";
   } else if (atRisk === 0) {
-    label = sla_safe_percent != null ? "SLA Safe " + sla_safe_percent + "%" : "SLA Safe";
-    icon = "+";
-    bgColor = "rgba(0, 128, 0, 0.15)";
+    label = sla_safe_percent != null ? `SLA Safe ${sla_safe_percent}%` : "SLA Safe";
+    icon = "✓";
+    color = palette.success.main;
     ariaLabel = label;
   } else {
-    label = atRisk + " at risk";
+    label = `${atRisk} at risk`;
     icon = "!";
-    bgColor = "rgba(200, 100, 0, 0.2)";
-    ariaLabel = atRisk + " leads at SLA risk";
+    color = palette.warning.main;
+    ariaLabel = `${atRisk} leads at SLA risk`;
   }
-  const baseStyle = {
-    fontSize: "0.875rem",
+  const baseSx = {
+    fontSize: variant === "compact" ? "0.7rem" : variant === "summary" ? "1rem" : "0.875rem",
     fontWeight: 600,
-    padding: "0.25rem 0.6rem",
-    borderRadius: 6,
-    backgroundColor: bgColor,
-    display: "inline-flex" as const,
+    padding: variant === "compact" ? "0.15rem 0.4rem" : variant === "summary" ? "0.5rem 1rem" : "0.25rem 0.6rem",
+    borderRadius: variant === "summary" ? 2 : 1.5,
+    backgroundColor: `${color}20`,
+    color,
+    display: "inline-flex",
     alignItems: "center",
     gap: "0.35rem",
+    border: variant === "summary" ? `2px solid ${color}40` : "none",
   };
 
   if (atRisk > 0 && onAtRiskClick) {
     return (
-      <button
+      <Box
+        component="button"
         type="button"
         role="status"
         aria-label={ariaLabel}
@@ -147,18 +230,30 @@ export function QueueSlaIndicator({ summary, unavailable = false, onRetry, onAtR
             onAtRiskClick();
           }
         }}
-        style={{ ...baseStyle, border: "none", font: "inherit", cursor: "pointer" }}
+        sx={{
+          ...baseSx,
+          border: "none",
+          font: "inherit",
+          cursor: "pointer",
+          minWidth: 44,
+          minHeight: 44,
+        }}
       >
         <span aria-hidden="true">{icon}</span>
         {label}
-      </button>
+      </Box>
     );
   }
 
   return (
-    <span role="status" aria-label={ariaLabel} style={baseStyle}>
+    <Box
+      component="span"
+      role="status"
+      aria-label={ariaLabel}
+      sx={baseSx}
+    >
       <span aria-hidden="true">{icon}</span>
       {label}
-    </span>
+    </Box>
   );
 }

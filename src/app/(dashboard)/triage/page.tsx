@@ -1,13 +1,18 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
 import {
   QueueSlaIndicator,
-  LeadSlaIndicator,
   type SlaStatusData,
   type QueueSlaSummary,
 } from "@/components/SLASafetyIndicator";
+import { LeadPriorityCard } from "@/features/triage/components/LeadPriorityCard";
+import {
+  QueueFilterBar,
+  type QueueFilterBarFilters,
+  type QueueSortOption,
+} from "@/features/triage/components/QueueFilterBar";
 
 interface Lead {
   id: string;
@@ -28,13 +33,45 @@ interface IngestionFailure {
   created_at: string;
 }
 
+function sortLeads(leads: Lead[], sort: QueueSortOption): Lead[] {
+  const copy = [...leads];
+  switch (sort) {
+    case "priority_desc":
+      const prioOrder = { vip: 0, high: 1, low: 2 };
+      return copy.sort((a, b) => prioOrder[a.priority] - prioOrder[b.priority]);
+    case "created_desc":
+      return copy.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    case "sla_soonest":
+      return copy.sort((a, b) => {
+        const ma = a.sla_status?.minutes_to_breach ?? Infinity;
+        const mb = b.sla_status?.minutes_to_breach ?? Infinity;
+        return ma - mb;
+      });
+    default:
+      return copy;
+  }
+}
+
+function filterLeads(leads: Lead[], filters: QueueFilterBarFilters): Lead[] {
+  return leads.filter((lead) => {
+    if (filters.priority != null && lead.priority !== filters.priority) return false;
+    if (filters.lifecycle != null && lead.lifecycle_state !== filters.lifecycle) return false;
+    if (filters.source != null && lead.source_channel !== filters.source) return false;
+    return true;
+  });
+}
+
 export default function TriagePage() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [leads, setLeads] = useState<Lead[]>([]);
   const [failures, setFailures] = useState<IngestionFailure[]>([]);
   const [slaSummary, setSlaSummary] = useState<QueueSlaSummary | null>(null);
   const [slaUnavailable, setSlaUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<QueueFilterBarFilters>({});
+  const [sort, setSort] = useState<QueueSortOption>("priority_desc");
 
   const loadData = async () => {
     setLoading(true);
@@ -76,217 +113,175 @@ export default function TriagePage() {
     loadData();
   }, []);
 
+  const filteredLeads = useMemo(() => filterLeads(leads, filters), [leads, filters]);
+  const sortedLeads = useMemo(() => sortLeads(filteredLeads, sort), [filteredLeads, sort]);
+
+  // Top 3 urgent for "under 10 seconds" hierarchy
+  const topUrgent = sortedLeads.slice(0, 3);
+  const rest = sortedLeads.slice(3);
+
   if (loading) {
     return (
-      <div style={{ padding: "1.5rem", maxWidth: 960, margin: "0 auto" }}>
-        <p>Loading leads…</p>
-      </div>
+      <Box sx={{ p: 3, maxWidth: 960, mx: "auto" }}>
+        <Typography>Loading leads…</Typography>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <div style={{ padding: "1.5rem", maxWidth: 960, margin: "0 auto" }}>
-        <p style={{ color: "crimson" }}>Error loading leads: {error}</p>
-      </div>
+      <Box sx={{ p: 3, maxWidth: 960, mx: "auto" }}>
+        <Typography color="error">Error loading leads: {error}</Typography>
+      </Box>
     );
   }
 
+  const atRiskCount = (slaSummary?.count_breached ?? 0) + (slaSummary?.count_breach_risk ?? 0) + (slaSummary?.count_warning ?? 0);
+
   return (
-    <div style={{ padding: "1.5rem", maxWidth: 960, margin: "0 auto" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 600, margin: 0 }}>
+    <Box sx={{ p: 3, maxWidth: 960, mx: "auto" }} component="main" aria-label="Triage queue">
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2, flexWrap: "wrap" }}>
+        <Typography variant="h5" component="h1" sx={{ fontWeight: 600, m: 0 }}>
           Triage Queue
-        </h1>
+        </Typography>
         <QueueSlaIndicator
           summary={slaSummary}
           unavailable={slaUnavailable}
           onRetry={loadData}
+          onAtRiskClick={atRiskCount > 0 ? () => setFilters({ lifecycle: "at_risk" }) : undefined}
+          variant="inline"
         />
-        <button
-          type="button"
-          onClick={loadData}
-          disabled={loading}
-          style={{
-            padding: "0.4rem 0.75rem",
-            fontSize: "0.875rem",
-            border: "1px solid rgba(128,128,128,0.4)",
-            borderRadius: 6,
-            background: "var(--background)",
-            color: "var(--foreground)",
-            cursor: loading ? "not-allowed" : "pointer",
-          }}
-        >
+        <Button variant="outlined" size="small" onClick={loadData} disabled={loading}>
           {loading ? "Refreshing…" : "Refresh"}
-        </button>
-      </div>
-      <p style={{ color: "var(--foreground)", opacity: 0.8, marginBottom: "1rem" }}>
+        </Button>
+      </Box>
+
+      <QueueFilterBar
+        filters={filters}
+        sort={sort}
+        onFiltersChange={setFilters}
+        onSortChange={setSort}
+        state={filters.priority || filters.lifecycle || filters.source ? "filter-active" : "default"}
+        loading={loading}
+        noResults={sortedLeads.length === 0}
+      />
+
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         Inbound leads from WhatsApp
-      </p>
+      </Typography>
+
       {leads.length > 0 && leads.every((l) => !l.reason_tags?.length) && (
-        <div
-          style={{
-            padding: "0.75rem 1rem",
-            marginBottom: "1rem",
-            background: "rgba(90, 90, 140, 0.15)",
-            border: "1px solid rgba(90, 90, 140, 0.4)",
-            borderRadius: 8,
+        <Box
+          sx={{
+            p: 1.5,
+            mb: 2,
+            bgcolor: "action.hover",
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 2,
             fontSize: "0.85rem",
           }}
         >
           <strong>Mistral API demo:</strong> Leads are unclassified. Open any lead → click{" "}
           <strong>Reclassify</strong> to classify with Mistral AI. For at-risk leads, click{" "}
           <strong>Generate draft</strong> to create a recovery message.
-        </div>
+        </Box>
       )}
+
       {failures.length > 0 && (
-        <div
-          style={{
-            padding: "1rem",
-            marginBottom: "1rem",
-            border: "1px solid rgba(220, 50, 50, 0.5)",
-            borderRadius: 8,
-            backgroundColor: "rgba(220, 50, 50, 0.08)",
+        <Box
+          sx={{
+            p: 2,
+            mb: 2,
+            border: "1px solid",
+            borderColor: "error.main",
+            borderRadius: 2,
+            bgcolor: "error.light",
           }}
         >
-          <h2 style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "0.5rem", color: "crimson" }}>
+          <Typography variant="subtitle2" color="error" sx={{ mb: 0.5 }}>
             Recent ingestion failures ({failures.length})
-          </h2>
-          <ul style={{ margin: 0, paddingLeft: "1.25rem", fontSize: "0.875rem" }}>
+          </Typography>
+          <Box component="ul" sx={{ m: 0, pl: 2.5, fontSize: "0.875rem" }}>
             {failures.slice(0, 5).map((f) => (
               <li key={f.id}>
                 [{new Date(f.created_at).toLocaleString()}] {f.error_code}: {f.message}
               </li>
             ))}
-          </ul>
-        </div>
+          </Box>
+        </Box>
       )}
+
       {leads.length === 0 ? (
-        <p
-          style={{
-            padding: "2rem",
-            border: "1px solid rgba(128,128,128,0.3)",
-            borderRadius: 8,
-          }}
-        >
-          No leads yet. Ingest leads via the WhatsApp webhook.
-        </p>
+        <Box sx={{ p: 4, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+          <Typography>No leads yet. Ingest leads via the WhatsApp webhook.</Typography>
+        </Box>
+      ) : sortedLeads.length === 0 ? (
+        <Box sx={{ p: 4, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+          <Typography>No leads match the current filters.</Typography>
+        </Box>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          {leads.map((lead) => (
-            <Link
-              key={lead.id}
-              href={`/lead/${lead.id}`}
-              style={{
-                display: "block",
-                padding: "1rem",
-                border: "1px solid rgba(128,128,128,0.3)",
-                borderRadius: 8,
-                textDecoration: "none",
-                color: "var(--foreground)",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-                {lead.lifecycle_state === "at_risk" && (
-                  <span
-                    role="status"
-                    aria-label="At-risk lead"
-                    style={{
-                      fontSize: "0.7rem",
-                      fontWeight: 600,
-                      padding: "0.15rem 0.4rem",
-                      borderRadius: 4,
-                      backgroundColor: "rgba(200, 100, 0, 0.2)",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "0.25rem",
-                    }}
-                  >
-                    <span aria-hidden="true">⚠</span>
-                    At-Risk
-                  </span>
-                )}
-                {lead.lifecycle_state === "recovered" && (
-                  <span
-                    role="status"
-                    aria-label="Recovered lead"
-                    style={{
-                      fontSize: "0.7rem",
-                      fontWeight: 600,
-                      padding: "0.15rem 0.4rem",
-                      borderRadius: 4,
-                      backgroundColor: "rgba(0, 128, 0, 0.15)",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "0.25rem",
-                    }}
-                  >
-                    <span aria-hidden="true">✓</span>
-                    Recovered
-                  </span>
-                )}
-                {lead.lifecycle_state === "lost" && (
-                  <span
-                    role="status"
-                    aria-label="Lost lead"
-                    style={{
-                      fontSize: "0.7rem",
-                      fontWeight: 600,
-                      padding: "0.15rem 0.4rem",
-                      borderRadius: 4,
-                      backgroundColor: "rgba(128, 128, 128, 0.2)",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "0.25rem",
-                    }}
-                  >
-                    Lost
-                  </span>
-                )}
-                <span
-                  style={{
-                    fontSize: "0.7rem",
-                    fontWeight: 600,
-                    padding: "0.15rem 0.4rem",
-                    borderRadius: 4,
-                    textTransform: "uppercase",
-                    backgroundColor:
-                      lead.priority === "vip"
-                        ? "rgba(180, 100, 20, 0.25)"
-                        : lead.priority === "high"
-                          ? "rgba(80, 120, 200, 0.2)"
-                          : "rgba(128, 128, 128, 0.2)",
-                  }}
-                >
-                  {lead.priority}
-                </span>
-                <span style={{ fontWeight: 600 }}>
-                  {lead.source_external_id} · {lead.source_channel}
-                </span>
-                {lead.sla_status && (
-                  <LeadSlaIndicator slaStatus={lead.sla_status} compact />
-                )}
-                {(lead.reason_tags ?? []).slice(0, 2).map((tag) => (
-                  <span
-                    key={tag}
-                    style={{
-                      fontSize: "0.65rem",
-                      padding: "0.1rem 0.35rem",
-                      borderRadius: 4,
-                      backgroundColor: "rgba(128, 128, 128, 0.15)",
-                    }}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <div style={{ fontSize: "0.875rem", opacity: 0.7 }}>
-                {new Date(lead.created_at).toLocaleString()}
-              </div>
-            </Link>
+        <Box
+          component="ol"
+          role="list"
+          aria-label="Prioritized lead list"
+          sx={{ display: "flex", flexDirection: "column", gap: 1.5, listStyle: "none", m: 0, p: 0 }}
+        >
+          {topUrgent.length > 0 && (
+            <Box component="li" sx={{ display: "contents" }}>
+              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: -0.5 }}>
+                Top urgent
+              </Typography>
+            </Box>
+          )}
+          {topUrgent.map((lead) => (
+            <Box component="li" key={lead.id} sx={{ display: "contents" }}>
+              <LeadPriorityCard
+                lead={{
+                  id: lead.id,
+                  source_external_id: lead.source_external_id,
+                  source_channel: lead.source_channel,
+                  priority: lead.priority,
+                  lifecycle_state: lead.lifecycle_state ?? "default",
+                  reason_tags: lead.reason_tags ?? [],
+                  sla_status: lead.sla_status ?? null,
+                  created_at: lead.created_at,
+                }}
+                variant={isMobile ? "compact" : "standard"}
+                state={lead.lifecycle_state === "at_risk" ? "critical-at-risk" : "default"}
+              />
+            </Box>
           ))}
-        </div>
+          {rest.length > 0 && (
+            <>
+              {topUrgent.length > 0 && (
+                <Box component="li" sx={{ display: "contents" }}>
+                  <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mt: 1, mb: -0.5 }}>
+                    More leads
+                  </Typography>
+                </Box>
+              )}
+              {rest.map((lead) => (
+                <Box component="li" key={lead.id} sx={{ display: "contents" }}>
+                  <LeadPriorityCard
+                    lead={{
+                      id: lead.id,
+                      source_external_id: lead.source_external_id,
+                      source_channel: lead.source_channel,
+                      priority: lead.priority,
+                      lifecycle_state: lead.lifecycle_state ?? "default",
+                      reason_tags: lead.reason_tags ?? [],
+                      sla_status: lead.sla_status ?? null,
+                      created_at: lead.created_at,
+                    }}
+                    variant={isMobile ? "compact" : "standard"}
+                  />
+                </Box>
+              ))}
+            </>
+          )}
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }
